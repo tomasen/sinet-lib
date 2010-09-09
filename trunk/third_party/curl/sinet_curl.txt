@@ -1,0 +1,4 @@
+Extract curl into this directory. Make sure "README" and curl.vcproj are in the
+same directory.
+
+http://curl.haxx.se/

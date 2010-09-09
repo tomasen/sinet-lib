@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#ifdef _WINDOWS_
+#ifdef WIN32
 
 #ifndef WINVER
 #define WINVER 0x0400
@@ -14,6 +14,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#endif // _WINDOWS_
+#endif // WIN32
 
 #endif // PCH_H

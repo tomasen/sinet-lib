@@ -21,6 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="..\third_party\curl.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -82,6 +83,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="..\third_party\curl.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -144,6 +146,70 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="api"
+			>
+			<File
+				RelativePath=".\api_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\api_refptr.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="core"
+			>
+			<File
+				RelativePath=".\config.h"
+				>
+			</File>
+			<File
+				RelativePath=".\config_impl.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\config_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\pool.h"
+				>
+			</File>
+			<File
+				RelativePath=".\pool_impl.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\pool_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\request.h"
+				>
+			</File>
+			<File
+				RelativePath=".\request_impl.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\request_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\task.h"
+				>
+			</File>
+			<File
+				RelativePath=".\task_impl.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\task_impl.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\pch.cpp"
 			>
@@ -167,6 +233,10 @@
 		</File>
 		<File
 			RelativePath=".\pch.h"
+			>
+		</File>
+		<File
+			RelativePath=".\sinet.h"
 			>
 		</File>
 	</Files>
