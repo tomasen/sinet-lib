@@ -16,13 +16,24 @@ public:
   pool_impl(void);
   ~pool_impl(void);
 
-  virtual void execute(refptr<task> task);
-  virtual void cancel(refptr<task> task);
+  virtual void execute(refptr<task> task_in);
+  virtual void cancel(refptr<task> task_in);
+  virtual int is_running(refptr<task> task_in);
+  virtual void clear_all();
+  virtual void clean_finished();
+
+  typedef struct _task_info{
+    CURLM* hmaster;
+    std::vector<CURL*> htasks;
+    int running_handle;
+  }task_info;
 
 private:
-  CURLM* m_curl;
+  void _prepare_task(refptr<task> task_in, task_info& taskinfo_in);
+  void _clean_task(CURLM*& hmaster, std::vector<CURL*>& htasks);
 
-  std::map<CURL*, refptr<task> >  m_tasks;
+  critical_section                  m_cstasks;
+  std::map<refptr<task>, task_info> m_tasks;
 };
 
 } // namespace sinet

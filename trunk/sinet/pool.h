@@ -15,9 +15,14 @@ public:
   static refptr<pool> create_instance();
 
   // execute a task
-  virtual void execute(refptr<task> task) = 0;
+  virtual void execute(refptr<task> task_in) = 0;
   // cancel executing of a task
-  virtual void cancel(refptr<task> task) = 0;
+  virtual void cancel(refptr<task> task_in) = 0;
+  virtual int is_running(refptr<task> task_in) = 0;
+  // cancel and erase all tasks
+  virtual void clear_all() = 0;
+  // clean up finished tasks
+  virtual void clean_finished() = 0;
 };
 
 } // namespace sinet

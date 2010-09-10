@@ -29,6 +29,8 @@ public:
   virtual void detach_observer();
 
 private:
+  int m_status;
+  critical_section                m_csrequests;
   std::map<int, refptr<request> > m_requests;
 };
 

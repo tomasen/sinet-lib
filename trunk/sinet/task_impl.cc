@@ -10,7 +10,8 @@ refptr<task> task::create_instance()
   return _task;
 }
 
-task_impl::task_impl(void)
+task_impl::task_impl(void):
+  m_status(taskstatus_initial)
 {
 }
 
@@ -20,7 +21,8 @@ task_impl::~task_impl(void)
 
 int task_impl::append_request(refptr<request> request_in)
 {
-  return -1;
+  m_requests[0] = request_in;
+  return 0;
 }
 
 int task_impl::erase_request(int request_id)
@@ -45,6 +47,9 @@ std::vector<int> task_impl::get_request_ids()
 
 refptr<request> task_impl::get_request(int request_id)
 {
+  std::map<int, refptr<request> >::iterator it = m_requests.find(request_id);
+  if (it != m_requests.end())
+    return it->second;
   return refptr<request>();
 }
 
