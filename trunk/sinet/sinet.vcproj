@@ -209,6 +209,10 @@
 				RelativePath=".\task_impl.h"
 				>
 			</File>
+			<File
+				RelativePath=".\task_observer.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\pch.cpp"

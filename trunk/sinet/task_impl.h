@@ -15,8 +15,21 @@ public:
   task_impl(void);
   ~task_impl(void);
 
+  virtual int append_request(refptr<request> request_in);
+  virtual int erase_request(int request_id);
+  virtual void clearall_requests();
+  virtual int get_request_count();
+  virtual std::vector<int> get_request_ids();
+  virtual refptr<request> get_request(int request_id);
+
+  virtual void set_status(int status);
+  virtual int get_status();
+
+  virtual void attach_observer(itask_observer* observer_in);
+  virtual void detach_observer();
+
 private:
-  CURL* m_curl;
+  std::map<int, refptr<request> > m_requests;
 };
 
 } // namespace sine t
