@@ -158,6 +158,10 @@
 				RelativePath=".\api_refptr.h"
 				>
 			</File>
+			<File
+				RelativePath=".\api_types.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="core"
@@ -184,6 +188,30 @@
 			</File>
 			<File
 				RelativePath=".\pool_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\postdata.h"
+				>
+			</File>
+			<File
+				RelativePath=".\postdata_impl.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\postdata_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\postdataelem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\postdataelem_impl.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\postdataelem_impl.h"
 				>
 			</File>
 			<File

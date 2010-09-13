@@ -3,6 +3,7 @@
 
 #include "api_base.h"
 #include "api_refptr.h"
+#include "api_types.h"
 
 #include "config.h"
 #include "pool.h"
