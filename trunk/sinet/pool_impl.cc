@@ -230,7 +230,7 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
   //::curl_easy_setopt(curl, CURLOPT_URL, "http://www.plu.cn/");
   //::curl_easy_setopt(curl, CURLOPT_URL, "https://www.shooter.cn/tmp/alu.jpg");
   //::curl_easy_setopt(curl, CURLOPT_URL, "http://www.shooter.cn/tmp/alu.jpg");
-  ::curl_easy_setopt(curl, CURLOPT_URL, "http://122.9.59.231:9203/0B03BC6EC493E63FF6522E54F2F303B930CEDCE8C56F8BC6CF3B717FE202E3F021389AF444C551C8446C2BE70/dl_dir.qq.com/qqfile/qq/QQ2010/QQ2010SP1.exe");
+  ::curl_easy_setopt(curl, CURLOPT_URL, "http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
   ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_mem_callback);
   ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)req.get());
