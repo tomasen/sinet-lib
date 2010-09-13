@@ -29,11 +29,11 @@ public:
   {
     DeleteCriticalSection(&m_sec);
   }
-  void Lock()
+  void lock()
   {
     EnterCriticalSection(&m_sec);
   }
-  void Unlock()
+  void unlock()
   {
     LeaveCriticalSection(&m_sec);
   }
@@ -69,8 +69,8 @@ public:
 
   virtual int GetRefCt() { return m_dwRef; }
 
-  void Lock() { m_critsec.Lock(); }
-  void Unlock() { m_critsec.Unlock(); }
+  void Lock() { m_critsec.lock(); }
+  void Unlock() { m_critsec.unlock(); }
 
 protected:
   long m_dwRef;

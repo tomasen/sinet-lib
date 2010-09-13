@@ -10,9 +10,11 @@ namespace sinet
 {
 
 #define taskstatus_initial    0
-#define taskstatus_running    1
-#define taskstatus_failed     2
-#define taskstatus_completed  3
+#define taskstatus_queued     1
+#define taskstatus_running    2
+#define taskstatus_failed     3
+#define taskstatus_completed  4
+#define taskstatus_canceled   5
 
 //////////////////////////////////////////////////////////////////////////
 //
