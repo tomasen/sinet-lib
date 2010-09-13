@@ -5,6 +5,7 @@
 #include "api_refptr.h"
 #include "request.h"
 #include "task_observer.h"
+#include "config.h"
 
 namespace sinet
 {
@@ -17,14 +18,16 @@ namespace sinet
 
 //////////////////////////////////////////////////////////////////////////
 //
-//  Interface class task
+//  task class
 //
 //    A task can contain any number of request, for the pool to execute.
-//    This mechanism is designed for the lower network library to keep
-//    connection alive while executing several similar requests.
+//    All requests inside a task are executed simultaneously whenever
+//    started. There might be internal mechanisms in curl to limit
+//    the number of simultaneous connections and reuse them but we are
+//    not sure.
 //
 //    Once the task is being executed by the pool, one should not modify
-//    the requests in it, or append erase requests.
+//    the requests in it, or append, erase requests.
 //
 class task:
   public base
@@ -45,7 +48,7 @@ public:
   virtual int get_request_count() = 0;
   // get request ids
   // @returns a vector of int containing request ids
-  virtual std::vector<int> get_request_ids() = 0;
+  virtual void get_request_ids(std::vector<int>& ids_out) = 0;
   // get request by id
   // @returns request if found, or null if not found
   virtual refptr<request> get_request(int request_id) = 0;
@@ -59,6 +62,10 @@ public:
   // for observer/callback
   virtual void attach_observer(itask_observer* observer_in) = 0;
   virtual void detach_observer() = 0;
+
+  // for config definition
+  virtual void use_config(refptr<config> config) = 0;
+  virtual refptr<config> get_config() = 0;
 };
 
 } // namespace sinet

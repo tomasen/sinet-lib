@@ -8,6 +8,14 @@
 namespace sinet
 {
 
+//////////////////////////////////////////////////////////////////////////
+//
+//  pool class
+//
+//    The primary coordinator of tasks. It queues tasks so that only one
+//    task is being executed at one time (requests inside this task
+//    might be executed simultaneously).
+//
 class pool:
   public base
 {

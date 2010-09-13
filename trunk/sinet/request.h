@@ -8,6 +8,15 @@
 namespace sinet
 {
 
+//////////////////////////////////////////////////////////////////////////
+//
+//  request class
+//
+//    A request contains the parameter of this network transaction, as
+//    well as the returning buffer set by the pool.
+//
+//    The current design of request emphasizes on HTTP only.
+//
 class request:
   public base
 {

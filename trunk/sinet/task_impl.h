@@ -19,7 +19,7 @@ public:
   virtual int erase_request(int request_id);
   virtual void clearall_requests();
   virtual int get_request_count();
-  virtual std::vector<int> get_request_ids();
+  virtual void get_request_ids(std::vector<int>& ids_out);
   virtual refptr<request> get_request(int request_id);
 
   virtual void set_status(int status);
@@ -27,6 +27,9 @@ public:
 
   virtual void attach_observer(itask_observer* observer_in);
   virtual void detach_observer();
+
+  virtual void use_config(refptr<config> config);
+  virtual refptr<config> get_config();
 
 private:
   int m_status;

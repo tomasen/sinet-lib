@@ -40,6 +40,10 @@ void pool_impl::execute(refptr<task> task_in)
   if (!task_in)
     return;
 
+  // execute operation only push the task into queue.
+  // later on the coordinating thread should pick it up
+  // whenever possible.
+
   task_in->set_status(taskstatus_queued);
 
   m_cstask_queue.lock();

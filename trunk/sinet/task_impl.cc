@@ -40,9 +40,8 @@ int task_impl::get_request_count()
   return -1;
 }
 
-std::vector<int> task_impl::get_request_ids()
+void task_impl::get_request_ids(std::vector<int>& ids_out)
 {
-  return std::vector<int>();
 }
 
 refptr<request> task_impl::get_request(int request_id)
@@ -71,4 +70,14 @@ void task_impl::attach_observer(itask_observer* observer_in)
 void task_impl::detach_observer()
 {
 
+}
+
+void task_impl::use_config(refptr<config> config)
+{
+
+}
+
+refptr<config> task_impl::get_config()
+{
+  return NULL;
 }
