@@ -2,16 +2,18 @@
 #include "../../sinet/sinet.h"
 #include <time.h>
 
+using namespace sinet;
+
 int main(int argc, char* argv[])
 {
-  sinet::refptr<sinet::request> request = sinet::request::create_instance();
+  refptr<request> request = request::create_instance();
   //request->set_request_url(L"http://www.plu.cn/");
   //request->set_request_url(L"https://www.shooter.cn/tmp/alu.jpg");
   //request->set_request_url(L"http://www.shooter.cn/tmp/alu.jpg");
   request->set_request_url(L"http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
-  sinet::refptr<sinet::task> task = sinet::task::create_instance();
+  refptr<task> task = task::create_instance();
   task->append_request(request);
-  sinet::refptr<sinet::pool> pool = sinet::pool::create_instance();
+  refptr<pool> pool = pool::create_instance();
   pool->execute(task);
   printf("executing task\n");
   size_t response_size_last = 0;
@@ -31,7 +33,7 @@ int main(int argc, char* argv[])
     if (response_size_last > 5000000)
     {
       printf("canceling operation ... \n");
-      pool->cancel(task);
+//       pool->cancel(task);
       break;
     }
   }

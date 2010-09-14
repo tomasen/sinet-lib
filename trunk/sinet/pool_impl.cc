@@ -253,7 +253,7 @@ void pool_impl::_cancel_running_task(CURLM*& hmaster, std::vector<CURL*>& htasks
   ::curl_multi_cleanup(hmaster);
 }
 
-void sinet::pool_impl::_stop_thread()
+void pool_impl::_stop_thread()
 {
   ::SetEvent(m_stop_event);
   ::WaitForSingleObject(m_thread, INFINITE);
