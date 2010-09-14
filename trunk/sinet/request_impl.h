@@ -13,10 +13,10 @@ public:
   request_impl(void);
   ~request_impl(void);
 
-  virtual void set_request_method(std::wstring& method);
+  virtual void set_request_method(const wchar_t* method);
   virtual std::wstring get_request_method();
 
-  virtual void set_request_url(std::wstring& method);
+  virtual void set_request_url(const wchar_t* url);
   virtual std::wstring get_request_url();
 
   virtual void set_request_header(si_stringmap& header);
@@ -38,7 +38,8 @@ public:
   virtual int get_response_errcode();
 
 private:
-  size_t m_response_size;
+  std::wstring  m_url;
+  size_t        m_response_size;
 };
 
 } // namespace sinet

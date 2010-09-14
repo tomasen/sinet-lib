@@ -62,6 +62,7 @@ public:
   // for observer/callback
   virtual void attach_observer(itask_observer* observer_in) = 0;
   virtual void detach_observer() = 0;
+  virtual itask_observer* get_observer() = 0;
 
   // for config definition
   virtual void use_config(refptr<config> config) = 0;

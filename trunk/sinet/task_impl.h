@@ -27,6 +27,7 @@ public:
 
   virtual void attach_observer(itask_observer* observer_in);
   virtual void detach_observer();
+  virtual itask_observer* get_observer();
 
   virtual void use_config(refptr<config> config);
   virtual refptr<config> get_config();

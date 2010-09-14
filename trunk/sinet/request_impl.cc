@@ -20,7 +20,7 @@ request_impl::~request_impl(void)
 
 }
 
-void request_impl::set_request_method( std::wstring& method )
+void request_impl::set_request_method(const wchar_t* method)
 {
 
 }
@@ -30,17 +30,17 @@ std::wstring request_impl::get_request_method()
   return L"";
 }
 
-void request_impl::set_request_url( std::wstring& method )
+void request_impl::set_request_url(const wchar_t* url)
 {
-
+  m_url = url;
 }
 
 std::wstring request_impl::get_request_url()
 {
-  return L"";
+  return m_url;
 }
 
-void request_impl::set_request_header( si_stringmap& header )
+void request_impl::set_request_header(si_stringmap& header)
 {
 
 }
@@ -50,7 +50,7 @@ si_stringmap request_impl::get_request_header()
   return si_stringmap();
 }
 
-void request_impl::set_postdata( refptr<postdata> postdata )
+void request_impl::set_postdata(refptr<postdata> postdata)
 {
 
 }
@@ -60,7 +60,7 @@ refptr<postdata> request_impl::get_postdata()
   return NULL;
 }
 
-void request_impl::set_response_header( si_stringmap& header )
+void request_impl::set_response_header(si_stringmap& header)
 {
 
 }
@@ -70,7 +70,7 @@ si_stringmap request_impl::get_response_header()
   return si_stringmap();
 }
 
-void request_impl::set_response_buffer( si_buffer& buffer )
+void request_impl::set_response_buffer(si_buffer& buffer)
 {
 
 }
@@ -90,7 +90,7 @@ size_t request_impl::get_response_size()
   return m_response_size;
 }
 
-void request_impl::set_response_errcode( int errcode )
+void request_impl::set_response_errcode(int errcode)
 {
 
 }

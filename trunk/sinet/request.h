@@ -24,11 +24,11 @@ public:
   static refptr<request> create_instance();
 
   // request method
-  virtual void set_request_method(std::wstring& method) = 0;
+  virtual void set_request_method(const wchar_t* method) = 0;
   virtual std::wstring get_request_method() = 0;
 
   // request url
-  virtual void set_request_url(std::wstring& method) = 0;
+  virtual void set_request_url(const wchar_t* url) = 0;
   virtual std::wstring get_request_url() = 0;
 
   // request header

@@ -10,15 +10,20 @@ class postdataelem_impl:
   public threadsafe_base<postdataelem>
 {
 public:
+  virtual void set_name(const wchar_t* fieldname);
+  virtual std::wstring get_name();
+
   virtual void setto_empty();
-  virtual void setto_file(const std::wstring& filename);
+  virtual void setto_file(const wchar_t* filename);
   virtual void setto_buffer(const void* bytes_in, const size_t size_in);
+  virtual void setto_text(const wchar_t* text);
 
   virtual postdataelem_type_t get_type();
 
   virtual std::wstring get_file();
   virtual size_t get_buffer_size();
   virtual size_t copy_buffer_to(const void* bytes_inout, size_t size_in);
+  virtual std::wstring get_text();
 };
 
 } // namespace sinet

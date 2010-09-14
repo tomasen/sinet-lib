@@ -72,6 +72,11 @@ void task_impl::detach_observer()
 
 }
 
+itask_observer* task_impl::get_observer()
+{
+  return NULL;
+}
+
 void task_impl::use_config(refptr<config> config)
 {
 
