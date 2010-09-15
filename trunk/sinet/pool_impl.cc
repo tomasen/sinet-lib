@@ -19,9 +19,10 @@ static size_t write_mem_callback(void* ptr, size_t size, size_t nmemb, void* dat
   return realsize;
 }
 
-pool_impl::pool_impl(void)
+pool_impl::pool_impl(void):
+  m_stop_event(::CreateEvent(NULL, TRUE, FALSE, NULL)),
+  m_thread(NULL)
 {
-  m_stop_event = ::CreateEvent(NULL, TRUE, FALSE, NULL);
   m_thread = (HANDLE)::_beginthread(_thread_dispatch, 0, (void*)this);
 }
 
@@ -55,6 +56,7 @@ void pool_impl::cancel(refptr<task> task_in)
 {
   // stop task if it's running
   m_cstasks_running.lock();
+  m_cstask_queue.lock();
   std::map<refptr<task>, task_info>::iterator it = m_tasks_running.find(task_in);
   if (it != m_tasks_running.end())
   {
@@ -65,9 +67,7 @@ void pool_impl::cancel(refptr<task> task_in)
     m_cstask_finished.unlock();
     m_tasks_running.erase(it);
   }
-  m_cstasks_running.unlock();
   // clear task if it's queued
-  m_cstask_queue.lock();
   for (std::vector<refptr<task> >::iterator it = m_task_queue.begin();
     it != m_task_queue.end(); it++)
   {
@@ -75,6 +75,7 @@ void pool_impl::cancel(refptr<task> task_in)
       m_task_queue.erase(it);
   }
   m_cstask_queue.unlock();
+  m_cstasks_running.unlock();
 }
 
 int pool_impl::is_running(refptr<task> task_in)
@@ -158,7 +159,15 @@ void pool_impl::_thread()
 
   // the while loop only exists when m_stop_event is signaled by
   // _stop_thread()
-  while (::WaitForSingleObject(m_stop_event, 5) == WAIT_TIMEOUT)
+
+  // we set a dynamic sleep period here to allow partial sleeping
+  // when there are no running tasks and queue
+
+  const int sleep_period_defined = 5;
+  const int sleep_period_max = 500;
+  int sleep_period = 5;
+
+  while (::WaitForSingleObject(m_stop_event, sleep_period) == WAIT_TIMEOUT)
   {
     // thread loop procedure is as follows:
     // 1. iterate through |m_tasks_running| and try curl_multi_perform
@@ -177,6 +186,7 @@ void pool_impl::_thread()
     for (std::map<refptr<task>, task_info>::iterator it = m_tasks_running.begin();
       it != m_tasks_running.end(); it++)
     {
+      sleep_period = sleep_period_defined;
       ::curl_multi_perform(it->second.hmaster, &it->second.running_handle);
       if (it->second.running_handle == 0)
       {
@@ -209,11 +219,13 @@ void pool_impl::_thread()
     {
       task_info ti;
       _prepare_task(*it, ti);
+      ti.running_handle = 1;
       m_tasks_running[*it] = ti;
-      ::curl_multi_perform(ti.hmaster, 
-        &m_tasks_running.find(*it)->second.running_handle);
       m_task_queue.erase(it);
+      sleep_period = sleep_period_defined;
     }
+    else if (sleep_period < sleep_period_max)
+      sleep_period *= 2;
     m_cstask_queue.unlock();
     m_cstasks_running.unlock();
   }
@@ -256,5 +268,7 @@ void pool_impl::_cancel_running_task(CURLM*& hmaster, std::vector<CURL*>& htasks
 void pool_impl::_stop_thread()
 {
   ::SetEvent(m_stop_event);
-  ::WaitForSingleObject(m_thread, INFINITE);
+  if (m_thread && m_thread != INVALID_HANDLE_VALUE)
+    ::WaitForSingleObject(m_thread, INFINITE);
+  m_thread = NULL;
 }
