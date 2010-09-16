@@ -17,4 +17,12 @@
 
 #endif // WIN32
 
+#ifdef _MAC_
+
+#include <pthread.h>
+#include <time.h>
+#include <errno.h>
+
+#endif
+
 #endif // PCH_H

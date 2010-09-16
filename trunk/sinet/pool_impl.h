@@ -31,7 +31,11 @@ public:
   }task_info;
 
   // threading details for the pool
+#if defined(_WINDOWS_)
   static void _thread_dispatch(void* param);
+#elif defined(_MAC_)
+  static void* _thread_dispatch(void* param);
+#endif
   void _thread();
 
 private:
@@ -46,8 +50,13 @@ private:
   // called by destructor
   void _stop_thread();
 
+#if defined(_WINDOWS_)
   HANDLE  m_thread;
   HANDLE  m_stop_event;
+#elif defined(_MAC_)
+  pthread_t       m_thread;
+  pthread_cond_t  m_stop_event;
+#endif
 
   critical_section                  m_cstasks_running;
   critical_section                  m_cstask_queue;

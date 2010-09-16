@@ -12,35 +12,60 @@ public:
   virtual int GetRefCt() = 0;
 };
 
-#ifdef _WINDOWS_
+#if defined(_WINDOWS_)
 
 #define atomic_increment(p) InterlockedIncrement(p)
 #define atomic_decrement(p) InterlockedDecrement(p)
+  
+#elif defined(_MAC_)
 
+#define atomic_increment(p) __sync_fetch_and_add(p, 1)
+#define atomic_decrement(p) __sync_fetch_and_sub(p, 1)
+  
+#endif
+  
 class critical_section
 {
 public:
   critical_section()
   {
+#if defined(_WINDOWS_)
     memset(&m_sec, 0, sizeof(CRITICAL_SECTION));
     InitializeCriticalSection(&m_sec);
+#elif defined(_MAC_)
+    pthread_mutex_init(&m_mut, NULL);
+#endif
   }
   ~critical_section()
   {
+#if defined(_WINDOWS_)
     DeleteCriticalSection(&m_sec);
+#elif defined(_MAC_)
+    pthread_mutex_destroy(&m_mut);
+#endif
   }
   void lock()
   {
+#if defined(_WINDOWS_)
     EnterCriticalSection(&m_sec);
+#elif defined(_MAC_)
+    pthread_mutex_lock(&m_mut);
+#endif
   }
   void unlock()
   {
+#if defined(_WINDOWS_)
     LeaveCriticalSection(&m_sec);
+#elif defined(_MAC_)
+    pthread_mutex_unlock(&m_mut);
+#endif
   }
+#if defined(_WINDOWS_)
   CRITICAL_SECTION m_sec;
+#elif defined(_MAC_)
+  pthread_mutex_t m_mut;
+#endif
 };
-
-#endif // _WINDOWS_
 
 template <class ClassName>
 class threadsafe_base : public ClassName

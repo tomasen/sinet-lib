@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "pool_impl.h"
 #include <curl/curl.h>
+#if defined(_WINDOWS_)
 #include <process.h>
+#elif defined(_MAC_)
+#include <pthread.h>
+#endif
 
 using namespace sinet;
 
@@ -19,18 +23,28 @@ static size_t write_mem_callback(void* ptr, size_t size, size_t nmemb, void* dat
   return realsize;
 }
 
-pool_impl::pool_impl(void):
-  m_stop_event(::CreateEvent(NULL, TRUE, FALSE, NULL)),
-  m_thread(NULL)
+pool_impl::pool_impl(void)
+#if defined(_WINDOWS_)
+  :m_stop_event(::CreateEvent(NULL, TRUE, FALSE, NULL))
+#endif
 {
+#if defined(_WINDOWS_)
   m_thread = (HANDLE)::_beginthread(_thread_dispatch, 0, (void*)this);
+#elif defined(_MAC_)
+  pthread_cond_init(&m_stop_event, NULL);
+  ::pthread_create(&m_thread, NULL, _thread_dispatch, this);
+#endif
 }
 
 pool_impl::~pool_impl(void)
 {
   _stop_thread();
   clear_all();
+#if defined(_WINDOWS_)
   ::CloseHandle(m_stop_event);
+#elif defined(_MAC_)
+  pthread_cond_destroy(&m_stop_event);
+#endif
   // when a thread created by _beginthread is gracefully closed, it'll
   // call CloseHandle automatically, so there's no need for additional
   // free up operation.
@@ -147,7 +161,11 @@ void pool_impl::clear_all()
   m_cstask_finished.unlock();
 }
 
+#if defined(_WINDOWS_)
 void pool_impl::_thread_dispatch(void* param)
+#elif defined(_MAC_)
+void* pool_impl::_thread_dispatch(void* param)
+#endif
 {
   static_cast<pool_impl*>(param)->_thread();
 }
@@ -163,12 +181,30 @@ void pool_impl::_thread()
   // we set a dynamic sleep period here to allow partial sleeping
   // when there are no running tasks and queue
 
-  const int sleep_period_defined = 5;
-  const int sleep_period_max = 500;
+  const size_t sleep_period_defined = 5;
+  const size_t sleep_period_max = 500;
   int sleep_period = 5;
+  
+#if defined(_MAC_)
+  pthread_mutex_t mut_wait = PTHREAD_MUTEX_INITIALIZER;
+  pthread_mutex_lock(&mut_wait);
+  
+  struct timeval now;
+  struct timespec timeout;
+  long long future_us;
+  gettimeofday(&now, NULL);
+  future_us = now.tv_usec + sleep_period * 1000;
+  timeout.tv_nsec = (future_us % 1000000) * 1000;
+  timeout.tv_sec = now.tv_sec + future_us / 1000000;
+#endif
 
+#if defined(_WINDOWS_)
   while (::WaitForSingleObject(m_stop_event, sleep_period) == WAIT_TIMEOUT)
+#elif defined(_MAC_)
+  while (pthread_cond_timedwait(&m_stop_event, &mut_wait, &timeout) == ETIMEDOUT)
+#endif
   {
+    //printf("thread fired %d\n", future_us/1000);
     // thread loop procedure is as follows:
     // 1. iterate through |m_tasks_running| and try curl_multi_perform
     //    on all of them, if one's |ti.running_handles| equals 0, move
@@ -208,27 +244,42 @@ void pool_impl::_thread()
     m_cstasks_running.unlock();
 
     // step 2.
-    if (tasks_still_running > 0)
-      continue;
-
-    // step 3.
-    m_cstasks_running.lock();
-    m_cstask_queue.lock();
-    std::vector<refptr<task> >::iterator it = m_task_queue.begin();
-    if (it != m_task_queue.end())
+    if (tasks_still_running == 0)
     {
-      task_info ti;
-      _prepare_task(*it, ti);
-      ti.running_handle = 1;
-      m_tasks_running[*it] = ti;
-      m_task_queue.erase(it);
-      sleep_period = sleep_period_defined;
+      // step 3.
+      m_cstasks_running.lock();
+      m_cstask_queue.lock();
+      std::vector<refptr<task> >::iterator it = m_task_queue.begin();
+      if (it != m_task_queue.end())
+      {
+        task_info ti;
+        _prepare_task(*it, ti);
+        ti.running_handle = 1;
+        m_tasks_running[*it] = ti;
+        m_task_queue.erase(it);
+        sleep_period = sleep_period_defined;
+      }
+      else if (sleep_period < sleep_period_max)
+      {
+        sleep_period *= 2;
+        if (sleep_period > sleep_period_max)
+          sleep_period = sleep_period_max;
+      }
+      m_cstask_queue.unlock();
+      m_cstasks_running.unlock();
     }
-    else if (sleep_period < sleep_period_max)
-      sleep_period *= 2;
-    m_cstask_queue.unlock();
-    m_cstasks_running.unlock();
+
+#if defined(_MAC_)
+    gettimeofday(&now, NULL);
+    future_us = now.tv_usec + sleep_period * 1000;
+    timeout.tv_nsec = (future_us % 1000000) * 1000;
+    timeout.tv_sec = now.tv_sec + future_us / 1000000;
+#endif
   }
+  
+#if defined(_MAC_)
+  pthread_mutex_unlock(&mut_wait);
+#endif
 }
 
 void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
@@ -245,8 +296,8 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
   CURL* curl = ::curl_easy_init();
   //::curl_easy_setopt(curl, CURLOPT_URL, "http://www.plu.cn/");
   //::curl_easy_setopt(curl, CURLOPT_URL, "https://www.shooter.cn/tmp/alu.jpg");
-  //::curl_easy_setopt(curl, CURLOPT_URL, "http://www.shooter.cn/tmp/alu.jpg");
-  ::curl_easy_setopt(curl, CURLOPT_URL, "http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
+  ::curl_easy_setopt(curl, CURLOPT_URL, "http://www.shooter.cn/tmp/ALU.jpg");
+  //::curl_easy_setopt(curl, CURLOPT_URL, "http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
   ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_mem_callback);
   ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)req.get());
@@ -267,8 +318,13 @@ void pool_impl::_cancel_running_task(CURLM*& hmaster, std::vector<CURL*>& htasks
 
 void pool_impl::_stop_thread()
 {
+#if defined(_WINDOWS_)
   ::SetEvent(m_stop_event);
   if (m_thread && m_thread != INVALID_HANDLE_VALUE)
     ::WaitForSingleObject(m_thread, INFINITE);
   m_thread = NULL;
+#elif defined(_MAC_)
+  pthread_cond_signal(&m_stop_event);
+  pthread_join(m_thread, NULL);
+#endif
 }
