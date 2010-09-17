@@ -38,8 +38,14 @@ public:
   virtual int get_response_errcode();
 
 private:
-  std::wstring  m_url;
-  size_t        m_response_size;
+  std::wstring m_url;
+  std::wstring m_method;
+  si_buffer    m_response_buffer;
+  size_t       m_response_size;
+  si_stringmap m_header;
+  si_stringmap m_response_header;
+  int          m_response_errcode;
+  refptr<postdata> m_postdata;
 };
 
 } // namespace sinet

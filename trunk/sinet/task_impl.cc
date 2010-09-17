@@ -11,7 +11,8 @@ refptr<task> task::create_instance()
 }
 
 task_impl::task_impl(void):
-  m_status(taskstatus_initial)
+  m_status(taskstatus_initial),
+  m_current_id(0)
 {
 }
 
@@ -19,29 +20,46 @@ task_impl::~task_impl(void)
 {
 }
 
-int task_impl::append_request(refptr<request> request_in)
+void task_impl::append_request(refptr<request> request_in)
 {
-  m_requests[0] = request_in;
-  return 0;
+  m_csrequests.lock();
+  m_requests[m_current_id++] = request_in;
+  m_csrequests.unlock();
 }
 
 int task_impl::erase_request(int request_id)
 {
-  return -1;
+  m_csrequests.lock();
+  std::map<int, refptr<request> >::iterator it =
+    m_requests.find(request_id);
+  if (it != m_requests.end())
+  {
+    m_requests.erase(it);
+    m_csrequests.unlock();
+    return 1;
+  }
+  m_csrequests.unlock();
+  return 0;
 }
 
 void task_impl::clearall_requests()
 {
-
+  m_csrequests.lock();
+  m_requests.clear();
+  m_csrequests.unlock();
 }
 
 int task_impl::get_request_count()
 {
-  return -1;
+  return m_requests.size();
 }
 
 void task_impl::get_request_ids(std::vector<int>& ids_out)
 {
+  ids_out.clear();
+  for (std::map<int, refptr<request> >::iterator it = m_requests.begin();
+       it != m_requests.end(); it++)
+    ids_out.push_back(it->first);
 }
 
 refptr<request> task_impl::get_request(int request_id)
@@ -54,35 +72,47 @@ refptr<request> task_impl::get_request(int request_id)
 
 void task_impl::set_status(int status)
 {
-
+  if (status >= taskstatus_initial &&
+      status <= taskstatus_canceled)
+  {
+    m_csrequests.lock();
+    m_status = status;
+    m_csrequests.unlock();
+  }
 }
 
 int task_impl::get_status()
 {
-  return -1;
+  return m_status;
 }
 
 void task_impl::attach_observer(itask_observer* observer_in)
 {
-
+  m_csrequests.lock();
+  m_observer = observer_in;
+  m_csrequests.unlock();
 }
 
 void task_impl::detach_observer()
 {
-
+  m_csrequests.lock();
+  m_observer = NULL;
+  m_csrequests.unlock();
 }
 
 itask_observer* task_impl::get_observer()
 {
-  return NULL;
+  return m_observer;
 }
 
 void task_impl::use_config(refptr<config> config)
 {
-
+  m_csrequests.lock();
+  m_config = config;
+  m_csrequests.unlock();
 }
 
 refptr<config> task_impl::get_config()
 {
-  return NULL;
+  return m_config;
 }

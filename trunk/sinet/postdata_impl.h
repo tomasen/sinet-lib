@@ -11,10 +11,13 @@ class postdata_impl:
 {
 public:
   virtual void clear();
-  virtual int add_elem(refptr<postdataelem> elem);
+  virtual void add_elem(refptr<postdataelem> elem);
   virtual int remove_elem(refptr<postdataelem> elem);
-  virtual int get_elements(std::vector<refptr<postdataelem> >& elems);
+  virtual void get_elements(std::vector<refptr<postdataelem> >& elems);
   virtual int get_element_count();
+
+private:
+  std::vector<refptr<postdataelem> > m_elems;
 };
 
 }

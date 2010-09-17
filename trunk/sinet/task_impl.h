@@ -15,7 +15,7 @@ public:
   task_impl(void);
   ~task_impl(void);
 
-  virtual int append_request(refptr<request> request_in);
+  virtual void append_request(refptr<request> request_in);
   virtual int erase_request(int request_id);
   virtual void clearall_requests();
   virtual int get_request_count();
@@ -34,6 +34,9 @@ public:
 
 private:
   int m_status;
+  int m_current_id;
+  refptr<config>                  m_config;
+  itask_observer*                 m_observer;
   critical_section                m_csrequests;
   std::map<int, refptr<request> > m_requests;
 };

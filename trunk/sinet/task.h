@@ -37,7 +37,7 @@ public:
 
   // append a new request to the task
   // @returns request_id (int)
-  virtual int append_request(refptr<request> request_in) = 0;
+  virtual void append_request(refptr<request> request_in) = 0;
   // erase a request by id
   // @returns 1 if succeeded, 0 if failed
   virtual int erase_request(int request_id) = 0;

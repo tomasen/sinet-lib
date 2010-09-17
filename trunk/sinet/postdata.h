@@ -19,11 +19,11 @@ public:
   // clear all elements
   virtual void clear() = 0;
   // add an element, return non-zero if succeeds.
-  virtual int add_elem(refptr<postdataelem> elem) = 0;
+  virtual void add_elem(refptr<postdataelem> elem) = 0;
   // remove an element, return non-zero if succeeds.
   virtual int remove_elem(refptr<postdataelem> elem) = 0;
   // retrieve all elements, returning count
-  virtual int get_elements(std::vector<refptr<postdataelem> >& elems) = 0;
+  virtual void get_elements(std::vector<refptr<postdataelem> >& elems) = 0;
   virtual int get_element_count() = 0;
 };
 

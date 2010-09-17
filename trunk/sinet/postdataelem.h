@@ -40,7 +40,7 @@ public:
   virtual size_t get_buffer_size() = 0;
   // copy internal buffer out to |bytes_inout| with limit of |size_in| bytes
   // returning the actual size copied
-  virtual size_t copy_buffer_to(const void* bytes_inout, size_t size_in) = 0;
+  virtual size_t copy_buffer_to(void* bytes_inout, size_t size_in) = 0;
   virtual std::wstring get_text() = 0;
 };
 

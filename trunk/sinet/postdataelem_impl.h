@@ -22,8 +22,15 @@ public:
 
   virtual std::wstring get_file();
   virtual size_t get_buffer_size();
-  virtual size_t copy_buffer_to(const void* bytes_inout, size_t size_in);
+  virtual size_t copy_buffer_to(void* bytes_inout, size_t size_in);
   virtual std::wstring get_text();
+
+private:
+  std::wstring m_name;
+  std::wstring m_filename;
+  std::wstring m_text;
+  std::vector<wchar_t> m_buffer;
+  postdataelem_type_t  m_type;
 };
 
 } // namespace sinet
