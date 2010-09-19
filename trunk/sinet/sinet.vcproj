@@ -167,6 +167,10 @@
 			Name="core"
 			>
 			<File
+				RelativePath=".\auto_criticalsection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\config.h"
 				>
 			</File>

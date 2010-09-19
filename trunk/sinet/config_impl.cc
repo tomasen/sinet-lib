@@ -23,9 +23,8 @@ int config_impl::get_strvar(int id, std::wstring& strvarout)
 
 void config_impl::set_strvar(int id, std::wstring strvarin)
 {
-  m_csconfig.lock();
+  auto_criticalsection acs(m_csconfig);
   m_strvar[id] = strvarin;
-  m_csconfig.unlock();
 }
 
 int config_impl::remove_strvar(int id)
@@ -33,9 +32,8 @@ int config_impl::remove_strvar(int id)
   std::map<int, std::wstring>::iterator it = m_strvar.find(id);
   if (it != m_strvar.end())
   {
-    m_csconfig.lock();
+    auto_criticalsection acs(m_csconfig);
     m_strvar.erase(it);
-    m_csconfig.unlock();
     return 1;
   }
   return 0;

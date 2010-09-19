@@ -3,6 +3,7 @@
 
 #include "api_base.h"
 #include "api_refptr.h"
+#include "auto_criticalsection.h"
 
 namespace sinet
 {
