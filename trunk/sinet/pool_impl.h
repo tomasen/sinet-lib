@@ -7,8 +7,15 @@ typedef void CURLM;
 typedef void CURL;
 typedef void* HANDLE;
 
+struct curl_httppost;
+struct curl_slist;
+
 namespace sinet
 {
+
+// these defines are used for the request method
+#define   REQ_POST        L"POST"
+#define   REQ_GET         L"GET"
 
 class pool_impl:
   public threadsafe_base<pool>
@@ -24,9 +31,16 @@ public:
   virtual int is_running_or_queued(refptr<task> task_in);
   virtual void clear_all();
 
+  typedef struct _session_curl{
+    CURL* hcurl;
+    curl_httppost* post;
+    curl_httppost* last;
+    curl_slist* headerlist;
+  }session_curl;
+
   typedef struct _task_info{
     CURLM* hmaster;
-    std::vector<CURL*> htasks;
+    std::vector<session_curl> htasks;
     int running_handle;
   }task_info;
 
@@ -44,7 +58,7 @@ private:
   void _prepare_task(refptr<task> task_in, task_info& taskinfo_in);
   // tell CURL to stop running tasks
   // called by pool_impl::cancel, pool_impl::clear_all, pool_impl::_clean_finished
-  void _cancel_running_task(CURLM*& hmaster, std::vector<CURL*>& htasks);
+  void _cancel_running_task(CURLM*& hmaster, std::vector<session_curl>& htasks);
 
   // stopping and cleanup master pool thread
   // called by destructor
