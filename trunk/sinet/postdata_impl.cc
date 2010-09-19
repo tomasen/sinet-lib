@@ -42,13 +42,3 @@ int postdata_impl::get_element_count()
 {
   return m_elems.size();
 }
-
-std::wstring sinet::postdata_impl::get_form_name()
-{
-  return m_form_name;
-}
-
-void sinet::postdata_impl::set_form_name(std::wstring formname)
-{
-  m_form_name = formname;
-}

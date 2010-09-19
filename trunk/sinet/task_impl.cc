@@ -22,27 +22,31 @@ task_impl::~task_impl(void)
 
 void task_impl::append_request(refptr<request> request_in)
 {
-  auto_criticalsection acs(m_csrequests);
+  m_csrequests.lock();
   m_requests[m_current_id++] = request_in;
+  m_csrequests.unlock();
 }
 
 int task_impl::erase_request(int request_id)
 {
-  auto_criticalsection acs(m_csrequests);
+  m_csrequests.lock();
   std::map<int, refptr<request> >::iterator it =
     m_requests.find(request_id);
   if (it != m_requests.end())
   {
     m_requests.erase(it);
+    m_csrequests.unlock();
     return 1;
   }
+  m_csrequests.unlock();
   return 0;
 }
 
 void task_impl::clearall_requests()
 {
-  auto_criticalsection acs(m_csrequests);
+  m_csrequests.lock();
   m_requests.clear();
+  m_csrequests.unlock();
 }
 
 int task_impl::get_request_count()
@@ -71,8 +75,9 @@ void task_impl::set_status(int status)
   if (status >= taskstatus_initial &&
       status <= taskstatus_canceled)
   {
-    auto_criticalsection acs(m_csrequests);
+    m_csrequests.lock();
     m_status = status;
+    m_csrequests.unlock();
   }
 }
 
@@ -83,14 +88,16 @@ int task_impl::get_status()
 
 void task_impl::attach_observer(itask_observer* observer_in)
 {
-  auto_criticalsection acs(m_csrequests);
+  m_csrequests.lock();
   m_observer = observer_in;
+  m_csrequests.unlock();
 }
 
 void task_impl::detach_observer()
 {
-  auto_criticalsection acs(m_csrequests);
+  m_csrequests.lock();
   m_observer = NULL;
+  m_csrequests.unlock();
 }
 
 itask_observer* task_impl::get_observer()
@@ -100,8 +107,9 @@ itask_observer* task_impl::get_observer()
 
 void task_impl::use_config(refptr<config> config)
 {
-  auto_criticalsection acs(m_csrequests);
+  m_csrequests.lock();
   m_config = config;
+  m_csrequests.unlock();
 }
 
 refptr<config> task_impl::get_config()

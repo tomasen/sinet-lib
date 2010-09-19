@@ -6,7 +6,6 @@
 #include "request.h"
 #include "task_observer.h"
 #include "config.h"
-#include "auto_criticalsection.h"
 
 namespace sinet
 {
