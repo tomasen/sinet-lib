@@ -67,6 +67,21 @@ public:
 #endif
 };
 
+class auto_criticalsection
+{
+public:
+  auto_criticalsection(critical_section& cs): m_cs(&cs)
+  {
+    m_cs->lock();
+  }
+  virtual ~auto_criticalsection()
+  {
+    m_cs->unlock();
+  }
+private:
+  critical_section* m_cs;
+};
+
 template <class ClassName>
 class threadsafe_base : public ClassName
 {
