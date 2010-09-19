@@ -12,7 +12,8 @@ refptr<task> task::create_instance()
 
 task_impl::task_impl(void):
   m_status(taskstatus_initial),
-  m_current_id(0)
+  m_current_id(0),
+  m_observer(NULL)
 {
 }
 
@@ -70,10 +71,7 @@ void task_impl::set_status(int status)
 {
   if (status >= taskstatus_initial &&
       status <= taskstatus_canceled)
-  {
-    auto_criticalsection acs(m_csrequests);
     m_status = status;
-  }
 }
 
 int task_impl::get_status()
@@ -83,7 +81,6 @@ int task_impl::get_status()
 
 void task_impl::attach_observer(itask_observer* observer_in)
 {
-  auto_criticalsection acs(m_csrequests);
   m_observer = observer_in;
 }
 
@@ -100,7 +97,6 @@ itask_observer* task_impl::get_observer()
 
 void task_impl::use_config(refptr<config> config)
 {
-  auto_criticalsection acs(m_csrequests);
   m_config = config;
 }
 

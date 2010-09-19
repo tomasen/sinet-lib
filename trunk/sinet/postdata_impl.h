@@ -15,8 +15,8 @@ public:
   virtual int remove_elem(refptr<postdataelem> elem);
   virtual void get_elements(std::vector<refptr<postdataelem> >& elems);
   virtual int get_element_count();
-  virtual std::wstring get_form_name();
   virtual void set_form_name(std::wstring formname);
+  virtual std::wstring get_form_name();
 
 private:
   std::vector<refptr<postdataelem> > m_elems;

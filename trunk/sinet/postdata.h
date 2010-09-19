@@ -26,8 +26,8 @@ public:
   virtual void get_elements(std::vector<refptr<postdataelem> >& elems) = 0;
   virtual int get_element_count() = 0;
   // get and set form name
-  virtual std::wstring get_form_name() = 0;
   virtual void set_form_name(std::wstring formname) = 0;
+  virtual std::wstring get_form_name() = 0;
 };
 
 } // namespace sinet
