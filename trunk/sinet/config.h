@@ -8,6 +8,7 @@ namespace sinet
 {
 
 #define CFG_STR_PROXY        1
+#define CFG_STR_SSL          2
 
 class config:
   public base
