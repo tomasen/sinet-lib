@@ -227,6 +227,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\strings.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\strings.h"
+				>
+			</File>
+			<File
 				RelativePath=".\task.h"
 				>
 			</File>
