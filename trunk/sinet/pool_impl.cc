@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "pool_impl.h"
-#include "strings.h"
 #include <curl/curl.h>
 #if defined(_WINDOWS_)
 #include <process.h>
@@ -292,104 +291,27 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
   taskinfo_in_out.running_handle = 0;
 
   taskinfo_in_out.hmaster = ::curl_multi_init();
-
-  std::vector<int> reqids;
-  task_in->get_request_ids(reqids);
-
-  for (std::vector<int>::iterator it = reqids.begin(); it != reqids.end(); it++)
-  {
-    refptr<request> req = task_in->get_request(*it);
-    refptr<config> cfg = config::create_instance();
-    task_in->use_config(cfg);
-    
-    session_curl scurl;
-    std::wstring proxyurl, ssl;
-
-    CURL* curl = ::curl_easy_init();
-    if (!curl)
-      continue;
-
-    scurl.hcurl = curl;
-    scurl.post = NULL;
-    scurl.last = NULL;
-    scurl.headerlist = NULL;
-
-    ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_mem_callback);
-    ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)req.get());
-
-    ::curl_easy_setopt(curl, CURLOPT_URL, strings::wstring_utf8string(req->get_request_url()).c_str());
-
-    // set the proxy
-    if (cfg->get_strvar(CFG_STR_PROXY, proxyurl))
-      ::curl_easy_setopt(curl, CURLOPT_PROXY, strings::wstring_utf8string(proxyurl).c_str());
-
-    // set the ssl
-    if (cfg->get_strvar(CFG_STR_SSL, ssl))
-      ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-
-    // set header
-    si_stringmap header = req->get_request_header();
-    for (si_stringmap::iterator it = header.begin(); it != header.end(); it++)
-    {
-      std::wstring item;
-      // format:
-      // host:shooter.cn
-      item = (*it).first + L":" + (*it).second;
-      scurl.headerlist = ::curl_slist_append(scurl.headerlist, strings::wstring_utf8string(item).c_str());
-    }
-
-    std::wstring reqmethod = req->get_request_method();
-    if (reqmethod == L"GET")
-    {
-      ;
-    }
-    else if (reqmethod == L"POST")
-    {
-      // does not validate the request
-      scurl.headerlist = ::curl_slist_append(scurl.headerlist, "Expect:");
-      ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, scurl.headerlist);
-
-      std::vector<refptr<postdataelem> > elems;
-      refptr<postdata> postdata = req->get_postdata();
-      postdata->get_elements(elems);
-
-      // make a post form
-      for (std::vector<refptr<postdataelem> >::iterator it = elems.begin(); it != elems.end(); it++)
-      {
-        postdataelem_type_t elemtype = (*it)->get_type();
-        const char* name = strings::wstring_utf8string((*it)->get_name()).c_str();
-
-        if (elemtype == PDE_TYPE_TEXT)
-          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name, 
-                          CURLFORM_COPYCONTENTS, strings::wstring_utf8string((*it)->get_text()).c_str(), CURLFORM_END);
-        else if (elemtype == PDE_TYPE_FILE)
-          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name,
-                          CURLFORM_FILE, strings::wstring_utf8string((*it)->get_file()).c_str(), CURLFORM_END);
-        else if (elemtype == PDE_TYPE_BYTES)
-        {
-          void *buffer = NULL;
-          (*it)->copy_buffer_to(buffer, (*it)->get_buffer_size());
-          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name, CURLFORM_PTRCONTENTS, (char*)buffer, CURLFORM_END);
-        }
-
-        ::curl_easy_setopt(curl, CURLOPT_HTTPPOST, scurl.post);
-      }
-    }
-
-    taskinfo_in_out.htasks.push_back(scurl);
-    ::curl_multi_add_handle(taskinfo_in_out.hmaster, curl);
-  }
+  refptr<request> req = task_in->get_request(0);
+  // to do, fetch tasks
+  CURL* curl = ::curl_easy_init();
+  //::curl_easy_setopt(curl, CURLOPT_URL, "http://www.plu.cn/");
+  //::curl_easy_setopt(curl, CURLOPT_URL, "https://www.shooter.cn/tmp/alu.jpg");
+  ::curl_easy_setopt(curl, CURLOPT_URL, "http://www.shooter.cn/tmp/ALU.jpg");
+  //::curl_easy_setopt(curl, CURLOPT_URL, "http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
+  ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_mem_callback);
+  ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)req.get());
+  ::curl_easy_setopt(curl, CURLOPT_PROXY, "");
+  taskinfo_in_out.htasks.push_back(curl);
+  ::curl_multi_add_handle(taskinfo_in_out.hmaster, curl);
 }
 
-void pool_impl::_cancel_running_task(CURLM*& hmaster, std::vector<session_curl>& htasks) 
+void pool_impl::_cancel_running_task(CURLM*& hmaster, std::vector<CURL*>& htasks) 
 {
-  for (std::vector<session_curl>::iterator it = htasks.begin(); it != htasks.end(); it++)
+  for (std::vector<CURL*>::iterator it = htasks.begin(); it != htasks.end(); it++)
   {
-    ::curl_multi_remove_handle(hmaster, (*it).hcurl);
-    ::curl_easy_cleanup((*it).hcurl);
-    ::curl_formfree((*it).post);
-    ::curl_formfree((*it).last);
-    ::curl_slist_free_all((*it).headerlist);
+    ::curl_multi_remove_handle(hmaster, *it);
+    ::curl_easy_cleanup(*it);
   }
   ::curl_multi_cleanup(hmaster);
 }
