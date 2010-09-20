@@ -16,11 +16,51 @@ refptr<pool> pool::create_instance()
   return _pool;
 }
 
+static size_t write_header_callback(void* ptr, size_t size, size_t nmemb, void* data)
+{
+  int ret = size*nmemb;
+
+  refptr<request> request_in((request*)data);
+  si_stringmap header = request_in->get_response_header();
+
+  std::string str((char*)ptr);
+  std::wstring newstr = strings::utf8string_wstring(str);
+  
+  // the request header is end with '\r\n'
+  if (newstr == L"\r\n")
+   return ret;
+
+  std::wstring key, value;
+  std::wstring::size_type pos;
+
+  // format:
+  // Connection: keep-alive
+  pos = newstr.find(L":");
+  if (pos != std::string::npos)
+  {
+    key = newstr.substr(0, pos);
+    value = newstr.substr(pos+1, newstr.max_size());
+    header[key] = value;
+  }
+  else 
+  {
+    // save HTTP response status
+    header[L"response"] = newstr;  
+  }
+  
+  request_in->set_response_header(header);
+
+  return ret;
+}
+
 static size_t write_mem_callback(void* ptr, size_t size, size_t nmemb, void* data)
 {
   size_t realsize = size * nmemb;
-  refptr<request> request_in((request*)data);
+
+  refptr<request> request_in = (request*)data;
   request_in->set_response_size(request_in->get_response_size() + realsize + 1);
+  request_in->set_appendbuffer(ptr, realsize);
+
   return realsize;
 }
 
@@ -241,6 +281,17 @@ void pool_impl::_thread()
       _cancel_running_task((*it)->second.hmaster, (*it)->second.htasks);
       (*it)->first->set_status(taskstatus_completed);
       m_tasks_running.erase(*it);
+      std::vector<int> reqids;
+      (*it)->first->get_request_ids(reqids);
+
+      for (std::vector<int>::iterator reqit = reqids.begin(); reqit != reqids.end(); reqit++)
+      {
+        refptr<request> req = (*it)->first->get_request(*reqit);
+        si_stringmap header = req->get_response_header();
+        std::wstring str = header[L"response"];
+        std::wstring reqstatus = str.substr(str.find_first_of(L" ")+1, 3);
+        req->set_response_errcode(_wtoi(reqstatus.c_str()));
+      }
     }
     m_cstasks_running.unlock();
 
@@ -307,7 +358,6 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     
     session_curl scurl;
 
-
     CURL* curl = ::curl_easy_init();
     if (!curl)
       continue;
@@ -317,6 +367,8 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     scurl.last = NULL;
     scurl.headerlist = NULL;
 
+    ::curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_header_callback);
+    ::curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void *)req.get());
     ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_mem_callback);
     ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)req.get());
 

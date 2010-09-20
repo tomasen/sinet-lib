@@ -14,8 +14,8 @@ namespace sinet
 {
 
 // these defines are used for the request method
-#define   REQ_POST        L"POST"
-#define   REQ_GET         L"GET"
+#define   REQ_POST            L"POST"
+#define   REQ_GET             L"GET"
 
 class pool_impl:
   public threadsafe_base<pool>
