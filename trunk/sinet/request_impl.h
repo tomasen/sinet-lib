@@ -62,7 +62,7 @@ private:
   int          m_request_outmode;
   std::wstring m_outfile;
 
-  std::wofstream  m_outstream;
+  std::ofstream m_outstream;
 
   refptr<postdata> m_postdata;
 };
