@@ -133,24 +133,25 @@ void request_impl::set_appendbuffer(const void* data, size_t size)
   if (size == 0)
     return;
 
-  int outmode = get_request_outmode();
-  
+  switch (m_request_outmode)
+  {
   // save data to buffer
-  if (outmode == REQ_OUTBUFFER)
-  {
-    m_response_buffer.resize(size);
+  case REQ_OUTBUFFER:
+    {
     size_t lastsize = m_response_buffer.size();
+    m_response_buffer.resize(size);
     memcpy(&m_response_buffer[lastsize], data, size);
-  }
+    break;
+    }
   // save data to file
-  else if (outmode == REQ_OUTFILE)
-  {
+  case REQ_OUTFILE:
     if (!m_outstream.is_open())
     {
-      m_outstream.open(m_outfile.c_str(), std::ios_base::out);
+      m_outstream.open(m_outfile.c_str(), std::ios::out|std::ios::binary);
       if (!m_outstream)
         return;
     }
-    m_outstream<<(char*)data;
+    m_outstream.write((char*)data, size);
+    break;
   }
 }
