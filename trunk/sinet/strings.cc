@@ -17,3 +17,16 @@ std::string strings::wstring_utf8string(const std::wstring& s)
   delete[] ch;
   return str;
 }
+
+// Convert a std::string to a std::wstring (utf8)
+std::wstring strings::utf8string_wstring(const std::string& s)
+{
+  wchar_t* wch;
+  UINT bytes = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
+  wch  = new wchar_t[bytes];
+  if(wch)
+    bytes = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, wch, bytes);
+  std::wstring str = wch;
+  delete[] wch;
+  return str;
+}

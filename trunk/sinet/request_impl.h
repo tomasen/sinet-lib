@@ -2,9 +2,14 @@
 #define SINET_REQUEST_IMPL_H
 
 #include "request.h"
+#include <fstream>
 
 namespace sinet
 {
+
+// be used for response output
+#define   REQ_OUTFILE         1
+#define   REQ_OUTBUFFER       2
 
 class request_impl:
   public threadsafe_base<request>
@@ -37,6 +42,14 @@ public:
   virtual void set_response_errcode(int errcode);
   virtual int get_response_errcode();
 
+  virtual void set_request_outmode(int outmode);
+  virtual int get_request_outmode();
+
+  virtual void set_outfile(const wchar_t* file);
+  virtual std::wstring get_outfile();
+
+  virtual void set_appendbuffer(const void* data, size_t size);
+
 private:
   std::wstring m_url;
   std::wstring m_method;
@@ -45,6 +58,12 @@ private:
   si_stringmap m_header;
   si_stringmap m_response_header;
   int          m_response_errcode;
+  
+  int          m_request_outmode;
+  std::wstring m_outfile;
+
+  std::wofstream  m_outstream;
+
   refptr<postdata> m_postdata;
 };
 

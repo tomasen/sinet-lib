@@ -10,7 +10,8 @@ refptr<request> request::create_instance()
 }
 
 request_impl::request_impl(void):
-  m_response_size(0)
+  m_response_size(0),
+  m_request_outmode(REQ_OUTBUFFER)
 {
 
 }
@@ -99,7 +100,57 @@ void request_impl::set_response_errcode(int errcode)
   m_response_errcode = errcode;
 }
 
+// if HTTP request success, return 0, otherwise return it response status
 int request_impl::get_response_errcode()
 {
-  return m_response_errcode;
+  if (m_outstream.is_open())
+    m_outstream.close();
+  return 200==m_response_errcode?0:m_response_errcode;
+}
+
+void request_impl::set_request_outmode(int outmode)
+{
+  m_request_outmode = outmode;
+}
+
+int request_impl::get_request_outmode()
+{
+  return m_request_outmode;
+}
+
+void request_impl::set_outfile(const wchar_t *file)
+{
+  m_outfile = file;
+}
+
+std::wstring request_impl::get_outfile()
+{
+  return m_outfile;
+}
+
+void request_impl::set_appendbuffer(const void* data, size_t size)
+{
+  if (size == 0)
+    return;
+
+  int outmode = get_request_outmode();
+  
+  // save data to buffer
+  if (outmode == REQ_OUTBUFFER)
+  {
+    m_response_buffer.resize(size);
+    size_t lastsize = m_response_buffer.size();
+    memcpy(&m_response_buffer[lastsize], data, size);
+  }
+  // save data to file
+  else if (outmode == REQ_OUTFILE)
+  {
+    if (!m_outstream.is_open())
+    {
+      m_outstream.open(m_outfile.c_str(), std::ios_base::out);
+      if (!m_outstream)
+        return;
+    }
+    m_outstream<<(char*)data;
+  }
 }
