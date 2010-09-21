@@ -13,10 +13,3 @@ SINET_DYN_API int fnsinet_dyn(void)
 {
 	return 42;
 }
-
-// This is the constructor of a class that has been exported.
-// see sinet_dyn.h for the class definition
-Csinet_dyn::Csinet_dyn()
-{
-	return;
-}

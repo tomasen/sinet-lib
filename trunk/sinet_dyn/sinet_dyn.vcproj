@@ -167,6 +167,26 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\buffer_capi.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\buffer_capi.h"
+			>
+		</File>
+		<File
+			RelativePath=".\config_cpptoc.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\config_cpptoc.h"
+			>
+		</File>
+		<File
+			RelativePath=".\cpptoc.h"
+			>
+		</File>
+		<File
 			RelativePath=".\pch.cpp"
 			>
 			<FileConfiguration
@@ -192,11 +212,35 @@
 			>
 		</File>
 		<File
-			RelativePath=".\sinet_dyn.cpp"
+			RelativePath=".\postdataelem_cpptoc.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\postdataelem_cpptoc.h"
+			>
+		</File>
+		<File
+			RelativePath=".\sinet_capi.h"
 			>
 		</File>
 		<File
 			RelativePath=".\sinet_dyn.h"
+			>
+		</File>
+		<File
+			RelativePath=".\string_capi.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\string_capi.h"
+			>
+		</File>
+		<File
+			RelativePath=".\stringmap_capi.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\stringmap_capi.h"
 			>
 		</File>
 	</Files>
