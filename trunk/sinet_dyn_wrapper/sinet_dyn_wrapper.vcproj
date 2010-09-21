@@ -145,6 +145,18 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\config_ctocpp.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\config_ctocpp.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ctocpp.h"
+			>
+		</File>
+		<File
 			RelativePath=".\pch.cpp"
 			>
 			<FileConfiguration
@@ -167,6 +179,14 @@
 		</File>
 		<File
 			RelativePath=".\pch.h"
+			>
+		</File>
+		<File
+			RelativePath=".\postdataelem_ctocpp.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\postdataelem_ctocpp.h"
 			>
 		</File>
 	</Files>

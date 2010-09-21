@@ -10,13 +10,4 @@
 #define SINET_DYN_API __declspec(dllimport)
 #endif
 
-// This class is exported from the sinet_dyn.dll
-class SINET_DYN_API Csinet_dyn {
-public:
-	Csinet_dyn(void);
-	// TODO: add your methods here.
-};
-
-extern SINET_DYN_API int nsinet_dyn;
-
-SINET_DYN_API int fnsinet_dyn(void);
+#define SINET_DYN_CALLBACK __stdcall
