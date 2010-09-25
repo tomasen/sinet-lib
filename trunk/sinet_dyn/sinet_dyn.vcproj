@@ -46,6 +46,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pch.h"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -209,6 +210,14 @@
 		</File>
 		<File
 			RelativePath=".\pch.h"
+			>
+		</File>
+		<File
+			RelativePath=".\postdata_cpptoc.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\postdata_cpptoc.h"
 			>
 		</File>
 		<File

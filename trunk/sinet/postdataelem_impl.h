@@ -29,7 +29,7 @@ private:
   std::wstring m_name;
   std::wstring m_filename;
   std::wstring m_text;
-  std::vector<wchar_t> m_buffer;
+  std::vector<unsigned char> m_buffer;
   postdataelem_type_t  m_type;
 };
 
