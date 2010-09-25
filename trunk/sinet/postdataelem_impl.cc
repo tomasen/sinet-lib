@@ -35,9 +35,8 @@ void postdataelem_impl::setto_buffer(const void* bytes_in, const size_t size_in)
   if (size_in == 0)
     return;
   m_type = PDE_TYPE_BYTES;
-  size_t rsz = min(size_in, m_buffer.size());
-  m_buffer.resize(rsz);
-  memcpy(&m_buffer[0], bytes_in, rsz);
+  m_buffer.resize(size_in);
+  memcpy(&m_buffer[0], bytes_in, size_in);
 }
 
 void postdataelem_impl::setto_text(const wchar_t* text)
@@ -63,10 +62,9 @@ size_t postdataelem_impl::get_buffer_size()
 
 size_t postdataelem_impl::copy_buffer_to(void* bytes_inout, size_t size_in)
 {
-  size_t rsz = min(size_in, m_buffer.size());
-  if (rsz > 0)
+  if (size_in > 0)
     memcpy(bytes_inout, &m_buffer[0], size_in);
-  return rsz;
+  return size_in;
 }
 
 std::wstring postdataelem_impl::get_text()

@@ -62,6 +62,19 @@ extern "C" {
 
   SINET_DYN_API _postdataelem_t* _postdataelem_create_instance();
 
+  typedef struct __postdata_t
+  {
+    _base_t base;
+
+    void (SINET_DYN_CALLBACK *clear)(struct __postdata_t* self);
+    void (SINET_DYN_CALLBACK *add_elem)(struct __postdata_t* self, _postdataelem_t elem);
+    int (SINET_DYN_CALLBACK *remove_elem)(struct __postdata_t* self, _postdataelem_t elem);
+    void (SINET_DYN_CALLBACK *get_elements)(struct __postdata_t* self, _postdataelem_t* elems);
+    int (SINET_DYN_CALLBACK *get_element_count)(struct __postdata_t* self);
+
+  }_postdata_t;
+  SINET_DYN_API _postdata_t* _postdata_create_instance();
+
 
 #ifdef __cplusplus
 }
