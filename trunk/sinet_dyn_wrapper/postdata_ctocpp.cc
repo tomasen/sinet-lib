@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "postdata_ctocpp.h"
+#include "postdataelem_ctocpp.h"
 
 using namespace sinet;
 
@@ -13,25 +14,43 @@ refptr<postdata> postdata::create_instance()
 
 void postdata_ctocpp::clear()
 {
-
+  if (_MEMBER_MISSING(struct_, clear))
+    return;
+  struct_->clear(struct_);
 }
 
 void postdata_ctocpp::add_elem(refptr<postdataelem> elem)
 {
-
+  if (_MEMBER_MISSING(struct_, add_elem))
+    return;
+  struct_->add_elem(struct_, postdataelem_ctocpp::Unwrap(elem));
 }
 
 int postdata_ctocpp::remove_elem(refptr<postdataelem> elem)
 {
-  return 0;
+  if (_MEMBER_MISSING(struct_, remove_elem))
+    return 0;
+  return struct_->remove_elem(struct_, postdataelem_ctocpp::Unwrap(elem));
 }
 
 void postdata_ctocpp::get_elements(std::vector<refptr<postdataelem> >& elems)
 {
-
+  elems.clear();
+  if (_MEMBER_MISSING(struct_, get_elements))
+    return;
+  int count = (int)get_element_count();
+  _postdataelem_t* pdeptr;
+  for (int index = 0; index < count; index++)
+  {
+    pdeptr = struct_->get_elements(struct_, index);
+    if (pdeptr)
+      elems.push_back(postdataelem_ctocpp::Wrap(pdeptr));
+  }
 }
 
 int postdata_ctocpp::get_element_count()
 {
-  return 0;
+  if (_MEMBER_MISSING(struct_, get_element_count))
+    return 0;
+  return struct_->get_element_count(struct_);
 }
