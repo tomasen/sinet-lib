@@ -192,14 +192,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\intlist_capi.cc"
-			>
-		</File>
-		<File
-			RelativePath=".\intlist_capi.h"
-			>
-		</File>
-		<File
 			RelativePath=".\intlist_capi.h"
 			>
 		</File>

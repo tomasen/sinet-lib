@@ -27,7 +27,7 @@ SINET_DYN_API void _intlist_free(_intlist_t intlist)
 
 SINET_DYN_API int* _intlist_get(_intlist_t intlist)
 {
-  if (intlist)
+  if (!intlist)
     return NULL;
 
   std::vector<int>* real_list = 
@@ -38,5 +38,3 @@ SINET_DYN_API int* _intlist_get(_intlist_t intlist)
 
   return &(*real_list)[0];
 }
-
-
