@@ -73,7 +73,43 @@ extern "C" {
     int (SINET_DYN_CALLBACK *get_element_count)(struct __postdata_t* self);
 
   }_postdata_t;
+
   SINET_DYN_API _postdata_t* _postdata_create_instance();
+
+  typedef struct __task_t
+  {
+    _base_t base;
+
+  }_task_t;
+  SINET_DYN_API _task_t* _task_create_instance();
+
+  typedef struct __request_t
+  {
+    _base_t base;
+
+    void (SINET_DYN_CALLBACK *set_request_method)(struct __request_t* self, const wchar_t* method);
+    _string_t (SINET_DYN_CALLBACK *get_request_method)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_request_url)(struct __request_t* self, const wchar_t* url);
+    _string_t (SINET_DYN_CALLBACK *get_request_url)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_request_header)(struct __request_t* self, _stringmap_t* header);
+    _stringmap_t (SINET_DYN_CALLBACK *get_request_header)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_postdata)(struct __request_t* self, _postdata_t* postdata);
+    _postdata_t* (SINET_DYN_CALLBACK *get_postdata)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_response_header)(struct __request_t* self, _stringmap_t* header);
+    _stringmap_t (SINET_DYN_CALLBACK *get_response_header)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_response_buffer)(struct __request_t* self, _buffer_t* buffer);
+    _buffer_t (SINET_DYN_CALLBACK *get_response_buffer)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_response_size)(struct __request_t* self, size_t size_in);
+    size_t (SINET_DYN_CALLBACK *get_response_size)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_response_errcode)(struct __request_t* self, int errcode);
+    int (SINET_DYN_CALLBACK *get_response_errcode)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_request_outmode)(struct __request_t* self, int outmode);
+    int (SINET_DYN_CALLBACK *get_request_outmode)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_outfile)(struct __request_t* self, const wchar_t* file);
+    _string_t (SINET_DYN_CALLBACK *get_outfile)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_appendbuffer)(struct __request_t* self, const void* data, size_t size);
+  }_request_t;
+  SINET_DYN_API _request_t* _request_create_instance();
 
 
 #ifdef __cplusplus

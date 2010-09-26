@@ -1,18 +1,17 @@
-#ifndef SINET_REQUEST_IMPL_H
-#define SINET_REQUEST_IMPL_H
+#ifndef REQUEST_CTOCPP_H
+#define REQUEST_CTOCPP_H
 
-#include "request.h"
-#include <fstream>
+#include "ctocpp.h"
+#include "../sinet_dyn/sinet_capi.h"
+#include "../sinet/request.h"
 
-namespace sinet
-{
-
-class request_impl:
-  public threadsafe_base<request>
+class request_ctocpp:
+  public ctocpp<request_ctocpp, request, _request_t>
 {
 public:
-  request_impl(void);
-  ~request_impl(void);
+  request_ctocpp(_request_t* rqst)
+    : ctocpp<request_ctocpp, request, _request_t>(rqst) {}
+  virtual ~request_ctocpp() {}
 
   virtual void set_request_method(const wchar_t* method);
   virtual std::wstring get_request_method();
@@ -45,24 +44,6 @@ public:
   virtual std::wstring get_outfile();
 
   virtual void set_appendbuffer(const void* data, size_t size);
-
-private:
-  std::wstring m_url;
-  std::wstring m_method;
-  si_buffer    m_response_buffer;
-  size_t       m_response_size;
-  si_stringmap m_header;
-  si_stringmap m_response_header;
-  int          m_response_errcode;
-  
-  int          m_request_outmode;
-  std::wstring m_outfile;
-
-  std::ofstream m_outstream;
-
-  refptr<postdata> m_postdata;
 };
 
-} // namespace sinet
-
-#endif // SINET_REQUEST_IMPL_H
+#endif // REQUEST_CTOCPP_H
