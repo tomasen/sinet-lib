@@ -17,6 +17,11 @@ namespace sinet
 //
 //    The current design of request emphasizes on HTTP only.
 //
+
+// be used for response output
+#define   REQ_OUTFILE         1
+#define   REQ_OUTBUFFER       2
+
 class request:
   public base
 {

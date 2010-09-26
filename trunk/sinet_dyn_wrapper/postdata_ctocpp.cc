@@ -33,6 +33,8 @@ int postdata_ctocpp::remove_elem(refptr<postdataelem> elem)
   return struct_->remove_elem(struct_, postdataelem_ctocpp::Unwrap(elem));
 }
 
+//use a special wrapped function of dll in this function
+//chrome is referred to here
 void postdata_ctocpp::get_elements(std::vector<refptr<postdataelem> >& elems)
 {
   elems.clear();
@@ -42,6 +44,7 @@ void postdata_ctocpp::get_elements(std::vector<refptr<postdataelem> >& elems)
   _postdataelem_t* pdeptr;
   for (int index = 0; index < count; index++)
   {
+    //get elements one by one by this special function
     pdeptr = struct_->get_elements(struct_, index);
     if (pdeptr)
       elems.push_back(postdataelem_ctocpp::Wrap(pdeptr));

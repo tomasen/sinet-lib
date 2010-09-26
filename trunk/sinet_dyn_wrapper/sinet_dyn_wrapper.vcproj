@@ -198,6 +198,22 @@
 			RelativePath=".\postdataelem_ctocpp.h"
 			>
 		</File>
+		<File
+			RelativePath=".\request_ctocpp.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\request_ctocpp.h"
+			>
+		</File>
+		<File
+			RelativePath=".\task_ctocpp.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\task_ctocpp.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -29,6 +29,8 @@ int SINET_DYN_CALLBACK _remove_elem(struct __postdata_t* self, _postdataelem_t* 
   return postdata_cpptoc::Get(self)->remove_elem(selfelemptr);
 }
 
+//this is a special way to wrap the get_elements function
+//chrome is referred to here
 _postdataelem_t* SINET_DYN_CALLBACK _get_elements(struct __postdata_t* self, int elemindex)
 {
   std::vector<refptr<postdataelem>> _elems;

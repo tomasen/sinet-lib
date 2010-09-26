@@ -139,7 +139,7 @@ void request_impl::set_appendbuffer(const void* data, size_t size)
   case REQ_OUTBUFFER:
     {
     size_t lastsize = m_response_buffer.size();
-    m_response_buffer.resize(size);
+    m_response_buffer.resize(lastsize + size);
     memcpy(&m_response_buffer[lastsize], data, size);
     break;
     }
@@ -152,6 +152,7 @@ void request_impl::set_appendbuffer(const void* data, size_t size)
         return;
     }
     m_outstream.write((char*)data, size);
+    m_outstream.close();
     break;
   }
 }
