@@ -4,6 +4,7 @@
 #include "string_capi.h"
 #include "buffer_capi.h"
 #include "stringmap_capi.h"
+#include "intlist_capi.h"
 #include "../sinet/api_types.h"
 
 using namespace sinet;

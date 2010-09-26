@@ -196,6 +196,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\intlist_capi.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\intlist_capi.h"
+			>
+		</File>
+		<File
 			RelativePath=".\pch.cpp"
 			>
 			<FileConfiguration
@@ -245,6 +253,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\request_cpptoc.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\request_cpptoc.h"
+			>
+		</File>
+		<File
 			RelativePath=".\sinet_capi.h"
 			>
 		</File>
@@ -266,6 +282,14 @@
 		</File>
 		<File
 			RelativePath=".\stringmap_capi.h"
+			>
+		</File>
+		<File
+			RelativePath=".\task_cpptoc.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\task_cpptoc.h"
 			>
 		</File>
 		<File
