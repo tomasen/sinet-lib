@@ -6,6 +6,7 @@
 #include "stringmap_capi.h"
 #include "intlist_capi.h"
 #include "../sinet/api_types.h"
+#include "../sinet/task_observer.h"
 
 using namespace sinet;
 
@@ -77,13 +78,6 @@ extern "C" {
 
   SINET_DYN_API _postdata_t* _postdata_create_instance();
 
-  typedef struct __task_t
-  {
-    _base_t base;
-
-  }_task_t;
-  SINET_DYN_API _task_t* _task_create_instance();
-
   typedef struct __request_t
   {
     _base_t base;
@@ -109,9 +103,30 @@ extern "C" {
     void (SINET_DYN_CALLBACK *set_outfile)(struct __request_t* self, const wchar_t* file);
     _string_t (SINET_DYN_CALLBACK *get_outfile)(struct __request_t* self);
     void (SINET_DYN_CALLBACK *set_appendbuffer)(struct __request_t* self, const void* data, size_t size);
+
   }_request_t;
   SINET_DYN_API _request_t* _request_create_instance();
 
+  typedef struct __task_t
+  {
+    _base_t base;
+
+    void (SINET_DYN_CALLBACK *append_request)(struct __task_t* self, _request_t* request_in);
+    int (SINET_DYN_CALLBACK *erase_request)(struct __task_t* self, int request_id);
+    void (SINET_DYN_CALLBACK *clearall_requests)(struct __task_t* self);
+    int (SINET_DYN_CALLBACK *get_request_count)(struct __task_t* self);
+    void (SINET_DYN_CALLBACK *get_request_ids)(struct __task_t* self, _intlist_t* ids_out);
+    _request_t* (SINET_DYN_CALLBACK *get_request)(struct __task_t* self, int request_id);
+    void (SINET_DYN_CALLBACK *set_status)(struct __task_t* self, int status);
+    int (SINET_DYN_CALLBACK *get_status)(struct __task_t* self);
+    void (SINET_DYN_CALLBACK *attach_observer)(struct __task_t* self, itask_observer* observer_in);
+    void (SINET_DYN_CALLBACK *detach_observer)(struct __task_t* self);
+    itask_observer* (SINET_DYN_CALLBACK *get_observer)(struct __task_t* self);
+    void (SINET_DYN_CALLBACK *use_config)(struct __task_t* self, _config_t* config);
+    _config_t* (SINET_DYN_CALLBACK *get_config)(struct __task_t* self);
+
+  }_task_t;
+  SINET_DYN_API _task_t* _task_create_instance();
 
 #ifdef __cplusplus
 }
