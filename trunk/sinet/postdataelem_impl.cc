@@ -62,7 +62,7 @@ size_t postdataelem_impl::get_buffer_size()
 
 size_t postdataelem_impl::copy_buffer_to(void* bytes_inout, size_t size_in)
 {
-  if (size_in > 0)
+  if (size_in > 0 && !m_buffer.empty())
     memcpy(bytes_inout, &m_buffer[0], size_in);
   return size_in;
 }

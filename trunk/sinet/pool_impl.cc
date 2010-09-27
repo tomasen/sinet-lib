@@ -41,6 +41,8 @@ static size_t write_header_callback(void* ptr, size_t size, size_t nmemb, void* 
     key = newstr.substr(0, pos);
     value = newstr.substr(pos+1, newstr.max_size());
     header[key] = value;
+    if (key == L"Content-Length")
+      request_in->set_response_size(_wtoi(value.c_str()));
   }
   else 
   {
@@ -280,7 +282,6 @@ void pool_impl::_thread()
     {
       _cancel_running_task((*it)->second.hmaster, (*it)->second.htasks);
       (*it)->first->set_status(taskstatus_completed);
-      m_tasks_running.erase(*it);
       std::vector<int> reqids;
       (*it)->first->get_request_ids(reqids);
 
@@ -292,6 +293,7 @@ void pool_impl::_thread()
         std::wstring reqstatus = str.substr(str.find_first_of(L" ")+1, 3);
         req->set_response_errcode(_wtoi(reqstatus.c_str()));
       }
+      m_tasks_running.erase(*it);
     }
     m_cstasks_running.unlock();
 
@@ -401,7 +403,6 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     {
       // does not validate the request
       scurl.headerlist = ::curl_slist_append(scurl.headerlist, "Expect:");
-      ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, scurl.headerlist);
 
       std::vector<refptr<postdataelem> > elems;
       refptr<postdata> postdata = req->get_postdata();
@@ -411,28 +412,38 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
       for (std::vector<refptr<postdataelem> >::iterator it = elems.begin(); it != elems.end(); it++)
       {
         postdataelem_type_t elemtype = (*it)->get_type();
-        const char* name = strings::wstring_utf8string((*it)->get_name()).c_str();
+        std::string name = strings::wstring_utf8string((*it)->get_name());
 
         if (elemtype == PDE_TYPE_TEXT)
-          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name, 
-                          CURLFORM_COPYCONTENTS, strings::wstring_utf8string((*it)->get_text()).c_str(), CURLFORM_END);
+        {
+          std::string cont = strings::wstring_utf8string((*it)->get_text());
+          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name.c_str(), 
+                          CURLFORM_COPYCONTENTS, cont.c_str(), CURLFORM_END);
+        }
         else if (elemtype == PDE_TYPE_FILE)
-          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name,
-                          CURLFORM_FILE, strings::wstring_utf8string((*it)->get_file()).c_str(), CURLFORM_END);
+        {
+          std::string cont = strings::wstring_utf8string((*it)->get_file());
+          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name.c_str(),
+                          CURLFORM_FILE, cont.c_str(), CURLFORM_END);
+        }
         else if (elemtype == PDE_TYPE_BYTES)
         {
           size_t buffsize = (*it)->get_buffer_size();
           void* buffer = malloc(buffsize);
           (*it)->copy_buffer_to(buffer, buffsize);
-          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name, CURLFORM_COPYCONTENTS, (char*)buffer,
-                          CURLFORM_CONTENTSLENGTH, buffsize, CURLFORM_END);
-          free(buffer);
+          
+          std::string cont = strings::wstring_utf8string((*it)->get_text());
+
+          ::curl_formadd(&scurl.post, &scurl.last, CURLFORM_COPYNAME, name.c_str(), CURLFORM_BUFFER, cont.c_str(), CURLFORM_BUFFERPTR,
+            (char*)buffer, CURLFORM_BUFFERLENGTH, buffsize, CURLFORM_END);
+
+          scurl.bufs.push_back(buffer);
         }
 
         ::curl_easy_setopt(curl, CURLOPT_HTTPPOST, scurl.post);
       }
     }
-
+    ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, scurl.headerlist);
     taskinfo_in_out.htasks.push_back(scurl);
     ::curl_multi_add_handle(taskinfo_in_out.hmaster, curl);
   }
@@ -442,10 +453,13 @@ void pool_impl::_cancel_running_task(CURLM*& hmaster, std::vector<session_curl>&
 {
   for (std::vector<session_curl>::iterator it = htasks.begin(); it != htasks.end(); it++)
   {
+    for (std::vector<void*>::iterator bfit = (*it).bufs.begin(); bfit != (*it).bufs.end(); bfit++)
+    {
+      free((*bfit));
+    }
     ::curl_multi_remove_handle(hmaster, (*it).hcurl);
     ::curl_easy_cleanup((*it).hcurl);
     ::curl_formfree((*it).post);
-    ::curl_formfree((*it).last);
     ::curl_slist_free_all((*it).headerlist);
   }
   ::curl_multi_cleanup(hmaster);

@@ -144,6 +144,8 @@ void request_impl::set_appendbuffer(const void* data, size_t size)
   if (size == 0)
     return;
 
+  m_retrieved_size += size;
+
   switch (m_request_outmode)
   {
   // save data to buffer
