@@ -9,5 +9,6 @@
 #include "pool.h"
 #include "request.h"
 #include "task.h"
+#include "task_observer.h"
 
 #endif // SINET_H
