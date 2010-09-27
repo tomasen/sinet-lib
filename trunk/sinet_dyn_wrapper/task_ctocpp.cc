@@ -47,9 +47,11 @@ void task_ctocpp::get_request_ids(std::vector<int>& ids_out)
     return;
   _intlist_t _ids_out;
   struct_->get_request_ids(struct_, &_ids_out);
+  size_t id_size = _intlist_size(_ids_out);
+  ids_out.resize(id_size);
   if (_ids_out)
   {
-    memcpy(&ids_out[0], _intlist_get(_ids_out), _intlist_size(_ids_out) * sizeof(int));
+     memcpy(&ids_out[0], _intlist_get(_ids_out), id_size * sizeof(int));
     _intlist_free(_ids_out);
   }
 }
