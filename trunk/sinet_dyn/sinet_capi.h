@@ -128,6 +128,21 @@ extern "C" {
   }_task_t;
   SINET_DYN_API _task_t* _task_create_instance();
 
+  typedef struct __pool_t
+  {
+    _base_t base;
+
+    void (SINET_DYN_CALLBACK *execute)(struct __pool_t* self, _task_t* task);
+    void (SINET_DYN_CALLBACK *cancel)(struct __pool_t* self, _task_t* task);
+    void (SINET_DYN_CALLBACK *clear_all)(struct __pool_t* self);
+
+    int (SINET_DYN_CALLBACK *is_running)(struct __pool_t* self, _task_t* task);
+    int (SINET_DYN_CALLBACK *is_queued)(struct __pool_t* self, _task_t* task);
+    int (SINET_DYN_CALLBACK *is_running_or_queued)(struct __pool_t* self, _task_t* task);
+  }_pool_t;
+
+  SINET_DYN_API _pool_t* _pool_create_instance();
+
 #ifdef __cplusplus
 }
 #endif
