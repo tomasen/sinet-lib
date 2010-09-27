@@ -21,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\winsock_ldap.vsprops;..\..\third_party\openssl.vsprops"
+			InheritedPropertySheets="..\..\third_party\winsock_ldap.vsprops;..\..\third_party\openssl.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -94,7 +94,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\winsock_ldap.vsprops;..\..\third_party\openssl.vsprops"
+			InheritedPropertySheets="..\..\third_party\winsock_ldap.vsprops;..\..\third_party\openssl.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
