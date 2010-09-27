@@ -101,6 +101,16 @@ size_t SINET_DYN_CALLBACK _get_response_size(struct __request_t* self)
   return request_cpptoc::Get(self)->get_response_size();
 }
 
+void SINET_DYN_CALLBACK _set_retrieved_size(struct __request_t* self, size_t size_in)
+{
+  request_cpptoc::Get(self)->set_retrieved_size(size_in);
+}
+
+size_t SINET_DYN_CALLBACK _get_retrieved_size(struct __request_t* self)
+{
+  return request_cpptoc::Get(self)->get_retrieved_size();
+}
+
 void SINET_DYN_CALLBACK _set_response_errcode(struct __request_t* self, int errcode)
 {
   request_cpptoc::Get(self)->set_response_errcode(errcode);
@@ -149,6 +159,7 @@ cpptoc<request_cpptoc, request, _request_t>(cls)
   struct_.struct_.get_response_errcode  = _get_response_errcode;
   struct_.struct_.get_response_header   = _get_response_header;
   struct_.struct_.get_response_size     = _get_response_size;
+  struct_.struct_.get_retrieved_size    = _get_retrieved_size;
   struct_.struct_.set_appendbuffer      = _set_appendbuffer;
   struct_.struct_.set_outfile           = _set_outfile;
   struct_.struct_.set_postdata          = _set_postdata;
@@ -160,4 +171,5 @@ cpptoc<request_cpptoc, request, _request_t>(cls)
   struct_.struct_.set_response_errcode  = _set_response_errcode;
   struct_.struct_.set_response_header   = _set_response_header;
   struct_.struct_.set_response_size     = _set_response_size;
+  struct_.struct_.set_retrieved_size    = _set_retrieved_size;
 }

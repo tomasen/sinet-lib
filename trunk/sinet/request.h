@@ -56,6 +56,10 @@ public:
   virtual void set_response_size(size_t size_in) = 0;
   virtual size_t get_response_size() = 0;
 
+  // response content buffer retrieved size
+  virtual void set_retrieved_size(size_t size_in) = 0;
+  virtual size_t get_retrieved_size() = 0;
+
   // response error code
   virtual void set_response_errcode(int errcode) = 0;
   virtual int get_response_errcode() = 0;

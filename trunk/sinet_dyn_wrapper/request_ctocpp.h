@@ -34,6 +34,9 @@ public:
   virtual void set_response_size(size_t size_in);
   virtual size_t get_response_size();
 
+  virtual void set_retrieved_size(size_t size_in);
+  virtual size_t get_retrieved_size();
+
   virtual void set_response_errcode(int errcode);
   virtual int get_response_errcode();
 

@@ -35,6 +35,9 @@ public:
   virtual void set_response_size(size_t size_in);
   virtual size_t get_response_size();
 
+  virtual void set_retrieved_size(size_t size_in);
+  virtual size_t get_retrieved_size();
+
   virtual void set_response_errcode(int errcode);
   virtual int get_response_errcode();
 
@@ -47,16 +50,17 @@ public:
   virtual void set_appendbuffer(const void* data, size_t size);
 
 private:
-  std::wstring m_url;
-  std::wstring m_method;
-  si_buffer    m_response_buffer;
-  size_t       m_response_size;
-  si_stringmap m_header;
-  si_stringmap m_response_header;
-  int          m_response_errcode;
+  std::wstring  m_url;
+  std::wstring  m_method;
+  si_buffer     m_response_buffer;
+  size_t        m_response_size;
+  size_t        m_retrieved_size;
+  si_stringmap  m_header;
+  si_stringmap  m_response_header;
+  int           m_response_errcode;
   
-  int          m_request_outmode;
-  std::wstring m_outfile;
+  int           m_request_outmode;
+  std::wstring  m_outfile;
 
   std::ofstream m_outstream;
 

@@ -157,6 +157,20 @@ size_t request_ctocpp::get_response_size()
   return struct_->get_response_size(struct_);
 }
 
+void request_ctocpp::set_retrieved_size(size_t size_in)
+{
+  if (_MEMBER_MISSING(struct_, set_retrieved_size))
+    return;
+  struct_->set_retrieved_size(struct_, size_in);
+}
+
+size_t request_ctocpp::get_retrieved_size()
+{
+  if (_MEMBER_MISSING(struct_, get_retrieved_size))
+    return 0;
+  return struct_->get_retrieved_size(struct_);
+}
+
 void request_ctocpp::set_response_errcode(int errcode)
 {
   if (_MEMBER_MISSING(struct_, set_response_errcode))
