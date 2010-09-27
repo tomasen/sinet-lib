@@ -183,6 +183,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\pool_ctocpp.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\pool_ctocpp.h"
+			>
+		</File>
+		<File
 			RelativePath=".\postdata_ctocpp.cc"
 			>
 		</File>

@@ -21,6 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
+			InheritedPropertySheets="..\third_party\curl.vsprops;..\third_party\openssl.vsprops;..\tests\winsock_ldap.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -93,6 +94,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
+			InheritedPropertySheets="..\third_party\curl.vsprops;..\third_party\openssl.vsprops;..\tests\winsock_ldap.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -218,6 +220,14 @@
 		</File>
 		<File
 			RelativePath=".\pch.h"
+			>
+		</File>
+		<File
+			RelativePath=".\pool_cpptoc.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\pool_cpptoc.h"
 			>
 		</File>
 		<File
