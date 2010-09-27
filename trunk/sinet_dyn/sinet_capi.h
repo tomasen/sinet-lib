@@ -96,6 +96,8 @@ extern "C" {
     _buffer_t (SINET_DYN_CALLBACK *get_response_buffer)(struct __request_t* self);
     void (SINET_DYN_CALLBACK *set_response_size)(struct __request_t* self, size_t size_in);
     size_t (SINET_DYN_CALLBACK *get_response_size)(struct __request_t* self);
+    void (SINET_DYN_CALLBACK *set_retrieved_size)(struct __request_t* self, size_t size_in);
+    size_t (SINET_DYN_CALLBACK *get_retrieved_size)(struct __request_t* self);
     void (SINET_DYN_CALLBACK *set_response_errcode)(struct __request_t* self, int errcode);
     int (SINET_DYN_CALLBACK *get_response_errcode)(struct __request_t* self);
     void (SINET_DYN_CALLBACK *set_request_outmode)(struct __request_t* self, int outmode);

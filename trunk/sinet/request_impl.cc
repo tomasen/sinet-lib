@@ -11,6 +11,7 @@ refptr<request> request::create_instance()
 
 request_impl::request_impl(void):
   m_response_size(0),
+  m_retrieved_size(0),
   m_request_outmode(REQ_OUTBUFFER)
 {
 
@@ -93,6 +94,16 @@ void request_impl::set_response_size(size_t size_in)
 size_t request_impl::get_response_size()
 {
   return m_response_size;
+}
+
+void request_impl::set_retrieved_size(size_t size_in)
+{
+  m_retrieved_size = size_in;
+}
+
+size_t request_impl::get_retrieved_size()
+{
+  return m_retrieved_size;
 }
 
 void request_impl::set_response_errcode(int errcode)
