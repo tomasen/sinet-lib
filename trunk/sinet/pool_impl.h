@@ -36,6 +36,7 @@ public:
     curl_httppost* post;
     curl_httppost* last;
     curl_slist* headerlist;
+    std::vector<void*>  bufs;
   }session_curl;
 
   typedef struct _task_info{
