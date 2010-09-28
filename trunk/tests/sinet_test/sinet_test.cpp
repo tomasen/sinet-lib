@@ -3,6 +3,7 @@
 #include "../../sinet/pool_impl.h"
 #include <time.h>
 #include <fstream>
+#include <Shlwapi.h>
 
 using namespace sinet;
 
@@ -29,11 +30,6 @@ using namespace sinet;
 #elif defined(_MAC_)
 #define CLOCKS_PER_SECOND 10000
 #endif
-
-#define REQ_ACT_GET     L"?act=get"
-#define REQ_ACT_COOKIE  L"?act=cookie"
-#define REQ_ACT_FORM    L"?act=form"
-#define REQ_ACT_FILE    L"?act=file"
 
 void run_test_poolcreation()
 {
@@ -106,7 +102,24 @@ void run_test_sampledownload()
   //SINET_VALIDATE_INT("sampledownload", response_size_last > 0, response_size_last);
 }
 
-refptr<request> create_test_req(std::wstring url, std::wstring act)
+  /****
+    测试方法：
+      1、将两个待上传的文件放入目录
+      2、设置UPLOADFILE、UPLOADBUFFER，分别为待上传文件名；
+         设置UPLOADBUFFER_FILENAME，它是指定其中被用于buffer上传时指定的文件名
+      3、在服务器端test_sinet.php同级目录下，放置用于验证两个上传文件的原文件
+         在test_sinet.php里设置$file1和$file2，分别为原文件所在路径
+  */
+#define REQ_ACT_GET     L"?act=get"
+#define REQ_ACT_COOKIE  L"?act=cookie"
+#define REQ_ACT_FORM    L"?act=form"
+#define REQ_ACT_FILE    L"?act=file"
+
+#define UPLOADFILE    L"form_putty.jpg"
+#define UPLOADBUFFER  L"form_buffer.jpg"
+#define UPLOADBUFFER_FILENAME   L"form_buffer.jpg"
+
+refptr<request> create_test_req(std::wstring url, std::wstring act, std::wstring filepath)
 {
   if (act.empty())
     return NULL;
@@ -159,15 +172,17 @@ refptr<request> create_test_req(std::wstring url, std::wstring act)
     // 上传文件
     refptr<postdataelem> elem6 = postdataelem::create_instance();
     elem6->set_name(L"form_upload1");
-    elem6->setto_file(L"C:\\Work\\Project\\sinet\\src\\trunk\\Release\\form_putty.exe");
+    std::wstring file = filepath + L"\\" + UPLOADFILE;
+    elem6->setto_file(file.c_str());
     postdata->add_elem(elem6);
 
     // 通过buffer上传文件
     std::ifstream fs;
-    fs.open(L"C:\\Work\\Project\\sinet\\src\\trunk\\Release\\form_buffer.exe", std::ios::binary|std::ios::in);
+    file = filepath + L"\\" + UPLOADBUFFER;
+    fs.open(file.c_str(), std::ios::binary|std::ios::in);
     if (!fs)
     {
-       printf("dose not open form_buffer.exe!\n");
+       printf("dose not open form_buffer.jpg!\n");
        return NULL;
     }
     fs.seekg(0, std::ios::end);
@@ -180,7 +195,7 @@ refptr<request> create_test_req(std::wstring url, std::wstring act)
     //printf("filesize = %d\n", filesize);
     refptr<postdataelem> elem7 = postdataelem::create_instance();
     elem7->set_name(L"form_upload2");
-    elem7->setto_text(L"form_buffer.exe");
+    elem7->setto_text(UPLOADBUFFER_FILENAME);
     elem7->setto_buffer(buffer, filesize);
     postdata->add_elem(elem7);
 
@@ -203,10 +218,21 @@ int main(int argc, char* argv[])
   refptr<config> cfg = config::create_instance();
   task->use_config(cfg);
 
-  refptr<request> req_get = create_test_req(L"http://webpj/test_sinet.php", REQ_ACT_FORM);
+  wchar_t path[256];
+  GetModuleFileName(NULL, path, 256);
+  PathRemoveFileSpecW(path);
+  std::wstring filepath = path;
+
+  refptr<request> req_get = create_test_req(L"http://webpj/test_sinet.php", REQ_ACT_FORM, filepath);
+  if (!req_get.get())
+  {
+    printf("req_get error\n");
+    return 0;
+  }
 
   req_get->set_request_outmode(REQ_OUTFILE);
-  req_get->set_outfile(L"C:\\Work\\Project\\sinet\\src\\trunk\\Release\\req_get.txt");
+  filepath += L"\\req_get.txt";
+  req_get->set_outfile(filepath.c_str());
 
   task->append_request(req_get);
   pool->execute(task);
@@ -216,14 +242,14 @@ int main(int argc, char* argv[])
   size_t kbps = 0;
   while (pool->is_running_or_queued(task))
   {
-    if (req_get->get_response_size() != response_size_last &&
-      clock() - last_clock > CLOCKS_PER_SECOND)
-    {
-      //kbps = (req_get->get_response_size()-response_size_last)/1024/((clock()-last_clock)/CLOCKS_PER_SECOND);
-      //response_size_last = req_get->get_response_size();
-      last_clock = clock();
-      //printf("response: %d (%d KB/s)\n", response_size_last, kbps);
-    }
+//     if (req_get->get_response_size() != response_size_last &&
+//       clock() - last_clock > CLOCKS_PER_SECOND)
+//     {
+//       //kbps = (req_get->get_response_size()-response_size_last)/1024/((clock()-last_clock)/CLOCKS_PER_SECOND);
+//       //response_size_last = req_get->get_response_size();
+//       last_clock = clock();
+//       //printf("response: %d (%d KB/s)\n", response_size_last, kbps);
+//     }
   }
   printf("%d,%d, response:%s\n", req_get->get_response_errcode(), req_get->get_response_size(), L"");
   return 0;
