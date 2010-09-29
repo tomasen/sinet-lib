@@ -290,6 +290,10 @@
 			RelativePath=".\task_cpptoc.h"
 			>
 		</File>
+		<File
+			RelativePath=".\urls.cc"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

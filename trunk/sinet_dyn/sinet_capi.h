@@ -145,6 +145,9 @@ extern "C" {
 
   SINET_DYN_API _pool_t* _pool_create_instance();
 
+  SINET_DYN_API int sinet_urlencode(const wchar_t* str_in, wchar_t* str_out, int* length_inout);
+  SINET_DYN_API int sinet_urldecode(const wchar_t* str_in, wchar_t* str_out, int* length_inout);
+
 #ifdef __cplusplus
 }
 #endif
