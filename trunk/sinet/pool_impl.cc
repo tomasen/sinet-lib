@@ -285,6 +285,13 @@ void pool_impl::_thread()
     {
       _cancel_running_task((*it)->second.hmaster, (*it)->second.htasks);
       (*it)->first->set_status(taskstatus_completed);
+      std::vector<int> ids;
+      (*it)->first->get_request_ids(ids);
+      for (std::vector<int>::iterator iit = ids.begin(); iit != ids.end(); iit++)
+      {
+        refptr<request> req = (*it)->first->get_request((*iit));
+        req->close_outfile();
+      }
       m_tasks_running.erase(*it);
     }
     m_cstasks_running.unlock();
