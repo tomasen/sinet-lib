@@ -221,6 +221,13 @@ std::wstring request_ctocpp::get_outfile()
   return L"";
 }
 
+void request_ctocpp::close_outfile()
+{
+  if (_MEMBER_MISSING(struct_, close_outfile))
+    return;
+  struct_->close_outfile(struct_);
+}
+
 void request_ctocpp::set_appendbuffer(const void* data, size_t size)
 {
   if (_MEMBER_MISSING(struct_, set_appendbuffer))

@@ -4,6 +4,8 @@
 #include <curl/curl.h>
 #if defined(_WINDOWS_)
 #include <process.h>
+#include <algorithm>
+#include <ctype.h>
 #elif defined(_MAC_)
 #include <pthread.h>
 #endif
@@ -47,7 +49,9 @@ static size_t write_header_callback(void* ptr, size_t size, size_t nmemb, void* 
   else 
   {
     // save HTTP response status
-    header[L"response"] = newstr;  
+    header[L""] = newstr;  
+    std::wstring reqstatus = newstr.substr(newstr.find_first_of(L" ")+1, 3);
+    request_in->set_response_errcode(_wtoi(reqstatus.c_str()));
   }
   
   request_in->set_response_header(header);
@@ -60,7 +64,6 @@ static size_t write_mem_callback(void* ptr, size_t size, size_t nmemb, void* dat
   size_t realsize = size * nmemb;
 
   refptr<request> request_in = (request*)data;
-  request_in->set_response_size(request_in->get_response_size() + realsize + 1);
   request_in->set_appendbuffer(ptr, realsize);
 
   return realsize;
@@ -282,16 +285,12 @@ void pool_impl::_thread()
     {
       _cancel_running_task((*it)->second.hmaster, (*it)->second.htasks);
       (*it)->first->set_status(taskstatus_completed);
-      std::vector<int> reqids;
-      (*it)->first->get_request_ids(reqids);
-
-      for (std::vector<int>::iterator reqit = reqids.begin(); reqit != reqids.end(); reqit++)
+      std::vector<int> ids;
+      (*it)->first->get_request_ids(ids);
+      for (std::vector<int>::iterator iit = ids.begin(); iit != ids.end(); iit++)
       {
-        refptr<request> req = (*it)->first->get_request(*reqit);
-        si_stringmap header = req->get_response_header();
-        std::wstring str = header[L"response"];
-        std::wstring reqstatus = str.substr(str.find_first_of(L" ")+1, 3);
-        req->set_response_errcode(_wtoi(reqstatus.c_str()));
+        refptr<request> req = (*it)->first->get_request((*iit));
+        req->close_outfile();
       }
       m_tasks_running.erase(*it);
     }
@@ -346,10 +345,13 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
 
   taskinfo_in_out.hmaster = ::curl_multi_init();
 
-  std::wstring proxyurl;
+  std::wstring proxyurl, useragent;
   refptr<config> cfg = task_in->get_config();
   if (cfg)
+  {
     cfg->get_strvar(CFG_STR_PROXY, proxyurl);
+    cfg->get_strvar(CFG_STR_AGENT, useragent);
+  }
 
   std::vector<int> reqids;
   task_in->get_request_ids(reqids);
@@ -384,6 +386,7 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 
     // set header
+    bool useagent = false;
     si_stringmap header = req->get_request_header();
     for (si_stringmap::iterator it = header.begin(); it != header.end(); it++)
     {
@@ -392,7 +395,15 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
       // host:shooter.cn
       item = (*it).first + L":" + (*it).second;
       scurl.headerlist = ::curl_slist_append(scurl.headerlist, strings::wstring_utf8string(item).c_str());
+      
+      std::wstring headerkey = (*it).first;
+      std::transform(headerkey.begin(), headerkey.end(), headerkey.begin(), towlower);
+      if (headerkey == L"user-agent")
+        useagent = true;
     }
+
+    if (!useagent && !useragent.empty())
+      ::curl_easy_setopt(curl, CURLOPT_USERAGENT, strings::wstring_utf8string(useragent).c_str());
 
     std::wstring reqmethod = req->get_request_method();
     if (reqmethod == REQ_GET)
@@ -401,9 +412,6 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     }
     else if (reqmethod == REQ_POST)
     {
-      // does not validate the request
-      scurl.headerlist = ::curl_slist_append(scurl.headerlist, "Expect:");
-
       std::vector<refptr<postdataelem> > elems;
       refptr<postdata> postdata = req->get_postdata();
       postdata->get_elements(elems);
@@ -453,14 +461,12 @@ void pool_impl::_cancel_running_task(CURLM*& hmaster, std::vector<session_curl>&
 {
   for (std::vector<session_curl>::iterator it = htasks.begin(); it != htasks.end(); it++)
   {
-    for (std::vector<void*>::iterator bfit = (*it).bufs.begin(); bfit != (*it).bufs.end(); bfit++)
-    {
-      free((*bfit));
-    }
     ::curl_multi_remove_handle(hmaster, (*it).hcurl);
     ::curl_easy_cleanup((*it).hcurl);
     ::curl_formfree((*it).post);
     ::curl_slist_free_all((*it).headerlist);
+    for (std::vector<void*>::iterator bfit = (*it).bufs.begin(); bfit != (*it).bufs.end(); bfit++)
+      free((*bfit));
   }
   ::curl_multi_cleanup(hmaster);
 }
