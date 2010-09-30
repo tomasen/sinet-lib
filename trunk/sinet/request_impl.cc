@@ -114,8 +114,6 @@ void request_impl::set_response_errcode(int errcode)
 // if HTTP request success, return 0, otherwise return it response status
 int request_impl::get_response_errcode()
 {
-  if (m_outstream.is_open())
-    m_outstream.close();
   return 200==m_response_errcode?0:m_response_errcode;
 }
 
@@ -137,6 +135,12 @@ void request_impl::set_outfile(const wchar_t *file)
 std::wstring request_impl::get_outfile()
 {
   return m_outfile;
+}
+
+void request_impl::close_outfile()
+{
+  if (m_outstream.is_open())
+    m_outstream.close();
 }
 
 void request_impl::set_appendbuffer(const void* data, size_t size)
@@ -161,11 +165,10 @@ void request_impl::set_appendbuffer(const void* data, size_t size)
     if (!m_outstream.is_open())
     {
       m_outstream.open(m_outfile.c_str(), std::ios::out|std::ios::binary);
-      if (!m_outstream)
+      if (!m_outstream.is_open())
         return;
     }
     m_outstream.write((char*)data, size);
-    m_outstream.close();
     break;
   }
 }

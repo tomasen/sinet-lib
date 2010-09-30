@@ -7,6 +7,16 @@
 
 using namespace sinet;
 
+#if defined(_WINDOWS_)
+#define CLOCKS_PER_SECOND CLOCKS_PER_SEC
+#define _SLEEP(secs) ::Sleep(secs*1000);
+
+#elif defined(_MAC_)
+#define CLOCKS_PER_SECOND 10000
+#define _SLEEP(secs) sleep(secs);
+
+#endif
+
 #define SINET_VALIDATE_INT(test_name, condition, variable) \
   { \
     if (##condition)\
@@ -25,16 +35,60 @@ using namespace sinet;
     \
 }
 
-#if defined(_WINDOWS_)
-#define CLOCKS_PER_SECOND CLOCKS_PER_SEC
-#elif defined(_MAC_)
-#define CLOCKS_PER_SECOND 10000
-#endif
+#define SINET_APPPATH(apppath) \
+  wchar_t tmppath[256];\
+  GetModuleFileName(NULL, tmppath, 256);\
+  PathRemoveFileSpecW(tmppath);\
+  apppath = tmppath;
 
-void run_test_poolcreation()
+
+  /* ################### test macros ################### */
+#define TEST_ENTER(testcase) \
+{ \
+  printf("\n--------------------------------------------\n");\
+  printf(#testcase "\n\n");\
+}
+
+#define TEST_THREAD_FEED(pool, task, req, secs, apply) \
+{\
+  printf("response feed:\n");\
+  while (pool->is_running_or_queued(task))\
+  {\
+    if (apply(task, req))\
+    {\
+       pool->cancel(task);\
+       break;\
+    }\
+    _SLEEP(secs);\
+  }\
+  printf("\n");\
+}
+
+#define TEST_RESULT(testcase, condition, variable) \
+{ \
+  if (##condition)\
+  printf ("\ntest [%s] is [PASSED]\n", testcase);\
+    else\
+    printf ("\ntest [%s] [FAILED], condition requires (" #condition ") and its value is: %d\n", testcase, variable);\
+    \
+}
+
+std::wstring Utf8StringToWString(const std::string& s)
 {
-  printf("--------------------------------------------\n");
-  printf("run_test_poolcreation\n");
+  wchar_t* wch;
+  UINT bytes = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
+  wch  = new wchar_t[bytes];
+  if(wch)
+    bytes = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, wch, bytes);
+  std::wstring str = wch;
+  delete[] wch;
+  return str;
+}
+
+void testcase_poolcreation()
+{
+  TEST_ENTER("testcase_poolcreation");
+
   int num_pools = 1000;
   printf("start timing for %d pool creation ...\n", num_pools);
   size_t clock_begin = clock();
@@ -44,231 +98,320 @@ void run_test_poolcreation()
   size_t clock_end = clock();
 
   size_t num_clocks = clock_end - clock_begin;
-  //SINET_VALIDATE_INT64("poolcreation", num_clocks < 500, num_clocks);
+  TEST_RESULT("testcase_poolcreation", num_clocks < 500, num_clocks);
 
-  printf("sleeping 20 seconds to observe CPU utilization ...\n");
-#if defined (_WINDOWS_)
-  ::Sleep(20000);
-#elif defined (_MAC_)
-  sleep(2);
-#endif
+  //printf("sleeping 20 seconds to observe CPU utilization ...\n");
+  //_SLEEP(20);
 }
 
-void run_test_sampledownload()
+clock_t last_clock;
+int testcase_canceldownload_feed(refptr<task> task, refptr<request> req)
 {
-  printf("--------------------------------------------\n");
-  printf("run_test_sampledownload\n");
-  refptr<request> request = request::create_instance();
-  //request->set_request_url(L"http://www.plu.cn/");
-  //request->set_request_url(L"https://www.shooter.cn/tmp/alu.jpg");
-  //request->set_request_url(L"http://www.shooter.cn/tmp/alu.jpg");
-  request->set_request_url(L"http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
-  refptr<task> task = task::create_instance();
-  task->append_request(request);
-  refptr<pool> pool = pool::create_instance();
-  pool->execute(task);
-  printf("executing task\n");
-  size_t response_size_last = 0;
-  clock_t last_clock = clock();
-  size_t kbps = 0;
-  while (pool->is_running_or_queued(task))
+  if (!req->get_response_size())
+    printf("response: %d \n", req->get_retrieved_size());
+
+  else
   {
-    // CLOCKS_PER_SEC is defined as 1000000 on Mac OS X 64 bit
-    // but when compiling a 32 bit program, it looks this value 
-    // should be something around 10000
-    // Windows don't have this problem, the definition is 1000
-    if (request->get_response_size() != response_size_last &&
+  // CLOCKS_PER_SEC is defined as 1000000 on Mac OS X 64 bit
+  // but when compiling a 32 bit program, it looks this value 
+  // should be something around 10000
+  // Windows don't have this problem, the definition is 1000
+    size_t kbps = 0;
+    if (req->get_response_size() != req->get_retrieved_size() &&
       clock() - last_clock > CLOCKS_PER_SECOND)
     {
-      kbps = (request->get_response_size()-response_size_last)/1024/((clock()-last_clock)/CLOCKS_PER_SECOND);
-      response_size_last = request->get_response_size();
+      kbps = (req->get_response_size()-req->get_retrieved_size())/1024/((clock()-last_clock)/CLOCKS_PER_SECOND);
       last_clock = clock();
-      printf("response: %d (%d KB/s)\n", response_size_last, kbps);
-    }
-#if defined(_WINDOWS_)
-    ::Sleep(50);
-#elif defined(_MAC_)
-    usleep(50000);
-#endif
-    if (response_size_last > 3000000)
-    {
-      printf("canceling operation ... \n");
-      pool->cancel(task);
-      break;
+      printf("response: %d (%d KB/s)\n", req->get_retrieved_size(), kbps);
     }
   }
-  printf("task complete, size: %d\n", request->get_response_size());
 
-  //SINET_VALIDATE_INT("sampledownload", response_size_last > 0, response_size_last);
+  if (req->get_retrieved_size() > 3000000)
+  {
+    printf("canceling operation ... \n");
+    return 1;
+  }
+  return 0;
+}
+void testcase_canceldownload(refptr<pool> pool, refptr<task> task, refptr<request> req)
+{
+  TEST_ENTER("testcase_canceldownload");
+
+  req->set_request_method(REQ_GET);
+  req->set_request_outmode(REQ_OUTFILE);
+  SINET_APPPATH(std::wstring file);
+  std::wstring filepath = file + L"\\canceldownload.exe";
+  req->set_outfile(filepath.c_str());
+  task->append_request(req);
+  pool->execute(task);
+  last_clock = clock();
+  TEST_THREAD_FEED(pool, task, req, 1, testcase_canceldownload_feed);
+  // must call the request close_outfile function after use REQ_OUTFILE mode
+  req->close_outfile();
+  printf("task complete, size: %d\n", req->get_response_size());
+
+  TEST_RESULT("testcase_canceldownload", req->get_response_size() > 0, req->get_response_size());
+}
+/*
+  Test HTTP GET method
+
+  test case
+    1、the request url use chinese with utf8
+    2、response body
+
+  validate:
+    client-side raw data compare response body
+    returns PASSED on success, otherwise FAILED
+ */
+#define TEST_RESPONSEDATA    L"123456abcdefg\x4E2D\x6587\x5B57\x7B26"
+#define TEST_RESPONSELENGTH  wcslen(TEST_RESPONSEDATA)
+
+int testcase_httpget_feed(refptr<task> task, refptr<request> req)
+{
+  printf("response: %d \n", req->get_retrieved_size());
+  return 0;
+}
+enum httpget_t
+{
+  hg_getchar,
+  hg_getch
+};
+void testcase_httpget(refptr<pool> pool, refptr<task> task, refptr<request> req, httpget_t gt = hg_getchar)
+{
+  TEST_ENTER("testcase_httpget");
+  req->set_request_method(REQ_GET);
+  task->append_request(req);
+  pool->execute(task);
+  TEST_THREAD_FEED(pool, task, req, 1, testcase_httpget_feed);
+
+  si_buffer buff = req->get_response_buffer();
+  buff.push_back(0);
+  void* buff2 = malloc(buff.size());
+  memcpy(buff2, &buff[0], buff.size());
+  std::string buffstr((char*)buff2);
+  free(buff2);
+
+  std::wstring data = Utf8StringToWString(buffstr);
+
+  if (gt == hg_getch)
+  {
+    wprintf(L"response data: %s, length: %d\n", data.c_str(), data.length());
+    TEST_RESULT("testcase_httpget", (req->get_response_errcode() == 0), req->get_response_errcode());
+    return;
+  }
+
+  std::wstring raw = TEST_RESPONSEDATA;
+  wprintf(L"raw data: %s, length: %d\n", raw.c_str(), TEST_RESPONSELENGTH);
+
+  wprintf(L"response data: %s, length: %d\n", data.c_str(), data.length());
+
+  int cmpval = wmemcmp(data.c_str(), TEST_RESPONSEDATA, TEST_RESPONSELENGTH);
+
+  TEST_RESULT("testcase_httpget", (cmpval == 0), cmpval);
 }
 
-  /****
-    测试方法：
-      1、将两个待上传的文件放入目录
-      2、设置UPLOADFILE、UPLOADBUFFER，分别为待上传文件名；
-         设置UPLOADBUFFER_FILENAME，它是指定其中被用于buffer上传时指定的文件名
-      3、在服务器端test_sinet.php同级目录下，放置用于验证两个上传文件的原文件
-         在test_sinet.php里设置$file1和$file2，分别为原文件所在路径
-  */
-#define REQ_ACT_GET     L"?act=get"
-#define REQ_ACT_COOKIE  L"?act=cookie"
-#define REQ_ACT_FORM    L"?act=form"
-#define REQ_ACT_FILE    L"?act=file"
+/*
+  Test HTTP POST method
 
-#define UPLOADFILE    L"form_putty.jpg"
-#define UPLOADBUFFER  L"form_buffer.jpg"
-#define UPLOADBUFFER_FILENAME   L"form_buffer.jpg"
+  test case:
+    1. the form value use chinese with utf8
+    2. upload file by form
+    3. use buffer instead file as upload
+    4. above mentioned can mix
 
-refptr<request> create_test_req(std::wstring url, std::wstring act, std::wstring filepath)
+  validate:
+    client-side post form, the values:"\x4E2D\x6587\x5B57\x7B26"(中文字符),abcdef,123456, or two mix upload
+    server-side raw data compare post data and the file size
+    returns PASSED on success, otherwise FAILED
+ */
+enum fupload_t{
+  form_null,
+  form_all,
+  form_buffer,
+  form_file
+};
+#define UPLOADEFILE L"testfile.jpg"
+int testcase_httpform_feed(refptr<task> task, refptr<request> req)
 {
-  if (act.empty())
-    return NULL;
+  printf("response: %d \n", req->get_retrieved_size());
+  return 0;
+}
+void testcase_httpform(refptr<pool> pool, refptr<task> task, refptr<request> req, fupload_t ft = form_null)
+{
+  TEST_ENTER("testcase_httpform");
+  req->set_request_method(REQ_POST);
 
-  refptr<request> request = request::create_instance();
+  refptr<postdata> postdata = postdata::create_instance();
+  refptr<postdataelem> elem1 = postdataelem::create_instance();
+  elem1->set_name(L"a1");
+  elem1->setto_text(L"\x4E2D\x6587\x5B57\x7B26");
+  postdata->add_elem(elem1);
 
-  std::wstring requrl = url + act;
-  request->set_request_url(requrl.c_str());
+  refptr<postdataelem> elem2 = postdataelem::create_instance();
+  elem2->set_name(L"a2");
+  elem2->setto_text(L"abcdef");
+  postdata->add_elem(elem2);
 
-  if (act == REQ_ACT_GET)
+  refptr<postdataelem> elem3 = postdataelem::create_instance();
+  elem3->set_name(L"a3");
+  elem3->setto_text(L"123456");
+  postdata->add_elem(elem3);
+
+  SINET_APPPATH(std::wstring file);
+  std::wstring filepath = file + L"\\" + UPLOADEFILE;
+
+  if (ft == form_buffer || ft == form_all)
   {
-    request->set_request_method(REQ_GET);
-  }
-  else if (act == REQ_ACT_COOKIE)
-  {
-    si_stringmap header;
-    header[L"Cookie"] = L"a1=1234567; a2=cookie; a3=%E8%BF%99%E6%98%AFcookie; a4=%E6%B5%8B%E8%AF%95%E6%B5%8B%E8%AF%95";
-    request->set_request_header(header);
-  }
-  else if (act == REQ_ACT_FORM)
-  {
-    request->set_request_method(REQ_POST);
-    refptr<postdata> postdata = postdata::create_instance();
-
-    refptr<postdataelem> elem1 = postdataelem::create_instance();
-    elem1->set_name(L"a1");
-    elem1->setto_text(L"测试表单");
-    postdata->add_elem(elem1);
-
-    refptr<postdataelem> elem2 = postdataelem::create_instance();
-    elem2->set_name(L"a2");
-    elem2->setto_text(L"testform");
-    postdata->add_elem(elem2);
-
-    refptr<postdataelem> elem3 = postdataelem::create_instance();
-    elem3->set_name(L"a3");
-    elem3->setto_text(L"12345678");
-    postdata->add_elem(elem3);
-
-    refptr<postdataelem> elem4 = postdataelem::create_instance();
-    elem4->set_name(L"a4");
-    elem4->setto_text(L"测试form");
-    postdata->add_elem(elem4);
-
-    refptr<postdataelem> elem5 = postdataelem::create_instance();
-    elem5->set_name(L"a5");
-    elem5->setto_text(L"123123form");
-    postdata->add_elem(elem5);
-
-    // 上传文件
-    refptr<postdataelem> elem6 = postdataelem::create_instance();
-    elem6->set_name(L"form_upload1");
-    std::wstring file = filepath + L"\\" + UPLOADFILE;
-    elem6->setto_file(file.c_str());
-    postdata->add_elem(elem6);
-
-    // 通过buffer上传文件
     std::ifstream fs;
-    file = filepath + L"\\" + UPLOADBUFFER;
-    fs.open(file.c_str(), std::ios::binary|std::ios::in);
+    fs.open(filepath.c_str(), std::ios::binary|std::ios::in);
     if (!fs)
     {
-       printf("dose not open form_buffer.jpg!\n");
-       return NULL;
+      wprintf(L"dose not open file.(%s)\n", filepath.c_str());
+      return;
     }
     fs.seekg(0, std::ios::end);
     size_t filesize = fs.tellg();
     void* buffer = malloc(filesize);
     fs.seekg(0, std::ios::beg);
     fs.read((char*)buffer, filesize);
-
     fs.close();
-    //printf("filesize = %d\n", filesize);
-    refptr<postdataelem> elem7 = postdataelem::create_instance();
-    elem7->set_name(L"form_upload2");
-    elem7->setto_text(UPLOADBUFFER_FILENAME);
-    elem7->setto_buffer(buffer, filesize);
-    postdata->add_elem(elem7);
 
+    refptr<postdataelem> elem4 = postdataelem::create_instance();
+    elem4->set_name(L"form_buffer");
+    elem4->setto_text(L"testbuffer.jpg");
+    elem4->setto_buffer(buffer, filesize);
+    postdata->add_elem(elem4);
     free(buffer);
-
-    request->set_postdata(postdata);
-
   }
-  else if (act == REQ_ACT_FILE)
+  if (ft == form_file || ft == form_all)
   {
+    refptr<postdataelem> elem5 = postdataelem::create_instance();
+    elem5->set_name(L"form_file");
+    elem5->setto_file(filepath.c_str());
+    postdata->add_elem(elem5);
   }
+
+  req->set_postdata(postdata);
+
+  task->append_request(req);
+  pool->execute(task);
+  TEST_THREAD_FEED(pool, task, req, 1, testcase_httpform_feed);
+
+  si_buffer buff = req->get_response_buffer();
+  buff.push_back(0);
+  void* buff2 = malloc(buff.size());
+  memcpy(buff2, &buff[0], buff.size());
+  std::string buffstr((char*)buff2);
+  free(buff2);
+
+  std::wstring data = Utf8StringToWString(buffstr);
+  wprintf(L"%s\n", data.c_str());
+
+  TEST_RESULT("testcase_httpform", (req->get_response_errcode() == 0), req->get_response_errcode());
+}
+
+/*
+  Test HTTP request header
+
+  test case:
+    1. construct http header User-Agent or Accept or Cookie etc.
+
+  validate:
+    1. server-side returns response code 200 and empty body
+    2. client-side checks the response header and see if it contains the original sent header
+    returns PASSED on success, otherwise FAILED
+ */
+int testcase_httpheader_feed(refptr<task> task, refptr<request> req)
+{
+  printf("response: %d \n", req->get_retrieved_size());
+  return 0;
+}
+void testcase_httpheader(refptr<pool> pool, refptr<task> task, refptr<request> req, si_stringmap header)
+{
+  TEST_ENTER("testcase_httpheader");
+
+  req->set_request_method(REQ_GET);
+  req->set_request_header(header);
   
-  return request;
+  task->append_request(req);
+
+  pool->execute(task);
+  TEST_THREAD_FEED(pool, task, req, 1, testcase_httpheader_feed);
+
+  si_stringmap newheader = req->get_response_header();
+  bool testok = true;
+  for (si_stringmap::iterator it = header.begin(); it != header.end(); it++)
+  {
+    std::wstring statstr;
+    if (newheader.find(it->first) != newheader.end())
+      statstr = L"ok";
+    else
+    {
+      statstr = L"fail";
+      testok = false;
+    }
+    wprintf(L"header %s : %s  [%s]\n", it->first.c_str(), it->second.c_str(), statstr.c_str());
+  }
+
+  TEST_RESULT("testcase_httpheader", (testok == true), testok);
 }
 
 int main(int argc, char* argv[])
 {
+  setlocale(LC_ALL, "chs");
+
   refptr<pool> pool = pool::create_instance();
   refptr<task> task = task::create_instance();
   refptr<config> cfg = config::create_instance();
   task->use_config(cfg);
 
-  wchar_t path[256];
-  GetModuleFileName(NULL, path, 256);
-  PathRemoveFileSpecW(path);
-  std::wstring filepath = path;
+  // test http get
+  refptr<request> req1 = request::create_instance();
+  req1->set_request_url(L"http://webpj/test_sinet.php?act=get");
+  testcase_httpget(pool, task, req1);
 
-  refptr<request> req_get = create_test_req(L"http://webpj/test_sinet.php", REQ_ACT_FORM, filepath);
-  if (!req_get.get())
-  {
-    printf("req_get error\n");
-    return 0;
-  }
+  // test http request url of chinese with utf8
+  refptr<request> req2 = request::create_instance();
+  req2->set_request_url(L"http://webpj/test_sinet.php?act=str&p=中文");
+  testcase_httpget(pool, task, req2, hg_getch);
 
-  req_get->set_request_outmode(REQ_OUTFILE);
-  filepath += L"\\req_get.txt";
-  req_get->set_outfile(filepath.c_str());
+  // test http post
+  refptr<request> req3 = request::create_instance();
+  req3->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  testcase_httpform(pool, task, req3);
 
-  task->append_request(req_get);
-  pool->execute(task);
+  // test http post + upload buffer
+  refptr<request> req4 = request::create_instance();
+  req4->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  testcase_httpform(pool, task, req4, form_buffer);
 
-  size_t response_size_last = 0;
-  clock_t last_clock = clock();
-  size_t kbps = 0;
-  while (pool->is_running_or_queued(task))
-  {
-//     if (req_get->get_response_size() != response_size_last &&
-//       clock() - last_clock > CLOCKS_PER_SECOND)
-//     {
-//       //kbps = (req_get->get_response_size()-response_size_last)/1024/((clock()-last_clock)/CLOCKS_PER_SECOND);
-//       //response_size_last = req_get->get_response_size();
-//       last_clock = clock();
-//       //printf("response: %d (%d KB/s)\n", response_size_last, kbps);
-//     }
-  }
-  printf("%d,%d, response:%s\n", req_get->get_response_errcode(), req_get->get_response_size(), L"");
+  // test http post + upload file
+  refptr<request> req5 = request::create_instance();
+  req5->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  testcase_httpform(pool, task, req5, form_file);
+
+  // test http post + upload buffer + upload file
+  refptr<request> req6 = request::create_instance();
+  req6->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  testcase_httpform(pool, task, req6, form_all);
+
+  // test http header
+  refptr<request> req7 = request::create_instance();
+  req7->set_request_url(L"http://webpj/test_sinet.php?act=header");
+  
+  si_stringmap header;
+  header[L"Cookie"] = L"a1=1234567; a2=cookie; a3=%E8%BF%99%E6%98%AFcookie; a4=%E6%B5%8B%E8%AF%95%E6%B5%8B%E8%AF%95";
+  header[L"User-Agent"] = L"Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6";
+  header[L"Accept"] = L"text/html";
+  testcase_httpheader(pool, task, req7, header);
+
+  // test create pool
+  testcase_poolcreation();
+
+  // test cancel download
+  refptr<request> req0 = request::create_instance();
+  req0->set_request_url(L"http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
+  testcase_canceldownload(pool, task, req0);
+
   return 0;
-
-  printf("sleeping 5 secs before test start ...\n\n");
-#if defined(_WINDOWS_)
-  ::Sleep(5000);
-#elif defined(_MAC_)
-  sleep(5);
-#endif
-
-  run_test_poolcreation();
-  run_test_sampledownload();
-
-  printf("\nsleeping 5 secs after test end ...\n");
-#if defined(_WINDOWS_)
-  ::Sleep(5000);
-#elif defined(_MAC_)
-  sleep(5);
-#endif
-	return 0;
 }
