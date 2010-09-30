@@ -141,6 +141,11 @@ _string_t SINET_DYN_CALLBACK _get_outfile(struct __request_t* self)
   return _string_alloc(request_cpptoc::Get(self)->get_outfile().c_str());
 }
 
+void SINET_DYN_CALLBACK _close_outfile(struct __request_t* self)
+{
+  request_cpptoc::Get(self)->close_outfile();
+}
+
 void SINET_DYN_CALLBACK _set_appendbuffer(struct __request_t* self, const void* data, size_t size)
 {
   request_cpptoc::Get(self)->set_appendbuffer(data, size);
@@ -172,4 +177,5 @@ cpptoc<request_cpptoc, request, _request_t>(cls)
   struct_.struct_.set_response_header   = _set_response_header;
   struct_.struct_.set_response_size     = _set_response_size;
   struct_.struct_.set_retrieved_size    = _set_retrieved_size;
+  struct_.struct_.close_outfile         = _close_outfile;
 }

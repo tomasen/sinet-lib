@@ -69,6 +69,7 @@ public:
 
   virtual void set_outfile(const wchar_t* file) = 0;
   virtual std::wstring get_outfile() = 0;
+  virtual void close_outfile() = 0;
 
   virtual void set_appendbuffer(const void* data, size_t size) = 0;
 };

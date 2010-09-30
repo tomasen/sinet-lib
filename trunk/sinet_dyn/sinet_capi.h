@@ -105,6 +105,7 @@ extern "C" {
     void (SINET_DYN_CALLBACK *set_outfile)(struct __request_t* self, const wchar_t* file);
     _string_t (SINET_DYN_CALLBACK *get_outfile)(struct __request_t* self);
     void (SINET_DYN_CALLBACK *set_appendbuffer)(struct __request_t* self, const void* data, size_t size);
+    void (SINET_DYN_CALLBACK *close_outfile)(struct __request_t* self);
 
   }_request_t;
   SINET_DYN_API _request_t* _request_create_instance();
