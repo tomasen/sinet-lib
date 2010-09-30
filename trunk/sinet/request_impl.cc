@@ -130,6 +130,7 @@ int request_impl::get_request_outmode()
 void request_impl::set_outfile(const wchar_t *file)
 {
   m_outfile = file;
+  _wremove(m_outfile.c_str());
 }
 
 std::wstring request_impl::get_outfile()

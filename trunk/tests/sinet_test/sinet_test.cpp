@@ -147,7 +147,7 @@ void testcase_canceldownload(refptr<pool> pool, refptr<task> task, refptr<reques
   last_clock = clock();
   TEST_THREAD_FEED(pool, task, req, 1, testcase_canceldownload_feed);
   // must call the request close_outfile function after use REQ_OUTFILE mode
-  req->close_outfile();
+//   req->close_outfile();
   printf("task complete, size: %d\n", req->get_response_size());
 
   TEST_RESULT("testcase_canceldownload", req->get_response_size() > 0, req->get_response_size());
@@ -410,7 +410,8 @@ int main(int argc, char* argv[])
 
   // test cancel download
   refptr<request> req0 = request::create_instance();
-  req0->set_request_url(L"http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
+  //req0->set_request_url(L"http://dl.baofeng.com/storm3/Storm2012-3.10.09.05.exe");
+  req0->set_request_url(L"http://dl_dir.qq.com/qqfile/qq/QQ2010/QQ2010sp2_Installer.exe");
   testcase_canceldownload(pool, task, req0);
 
   return 0;
