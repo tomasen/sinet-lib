@@ -129,10 +129,13 @@ void pool_impl::cancel(refptr<task> task_in)
   }
   // clear task if it's queued
   for (std::vector<refptr<task> >::iterator it = m_task_queue.begin();
-    it != m_task_queue.end(); it++)
+      it != m_task_queue.end(); it++)
   {
     if (*it == task_in)
-      m_task_queue.erase(it);
+    {
+     m_task_queue.erase(it);            // Mod
+     break;
+    }
   }
   m_cstask_queue.unlock();
   m_cstasks_running.unlock();
