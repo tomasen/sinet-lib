@@ -215,7 +215,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 9D16BA291240C613003DEFD1 /* Build configuration list for PBXProject "sinet" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 9D16BA241240C613003DEFD1;
 			productRefGroup = 9D16BA3A1240C64F003DEFD1 /* Products */;
 			projectDirPath = "";
@@ -266,6 +273,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = _MAC_;
 			};
 			name = Debug;
 		};
@@ -273,6 +281,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = _MAC_;
 			};
 			name = Release;
 		};

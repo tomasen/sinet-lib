@@ -44,14 +44,14 @@ static size_t write_header_callback(void* ptr, size_t size, size_t nmemb, void* 
     value = newstr.substr(pos+1, newstr.max_size());
     header[key] = value;
     if (key == L"Content-Length")
-      request_in->set_response_size(_wtoi(value.c_str()));
+      request_in->set_response_size(wcstol(value.c_str(), 0, 10));
   }
   else 
   {
     // save HTTP response status
     header[L""] = newstr;  
     std::wstring reqstatus = newstr.substr(newstr.find_first_of(L" ")+1, 3);
-    request_in->set_response_errcode(_wtoi(reqstatus.c_str()));
+    request_in->set_response_errcode(wcstol(reqstatus.c_str(), 0, 10));
   }
   
   request_in->set_response_header(header);

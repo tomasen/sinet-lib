@@ -74,7 +74,7 @@ si_stringmap request_impl::get_response_header()
 
 void request_impl::set_response_buffer(si_buffer& buffer)
 {
-  size_t rsz = min(buffer.size(), m_response_size);
+  size_t rsz = _min(buffer.size(), m_response_size);
   if (rsz == 0)
     return;
   m_response_buffer.resize(rsz);
@@ -130,7 +130,11 @@ int request_impl::get_request_outmode()
 void request_impl::set_outfile(const wchar_t *file)
 {
   m_outfile = file;
+#ifdef WIN32
   _wremove(m_outfile.c_str());
+#else
+	unlink(Utf8(m_outfile.c_str()));
+#endif
 }
 
 std::wstring request_impl::get_outfile()
@@ -165,8 +169,12 @@ void request_impl::set_appendbuffer(const void* data, size_t size)
   case REQ_OUTFILE:
     if (!m_outstream.is_open())
     {
-      m_outstream.open(m_outfile.c_str(), std::ios::out|std::ios::binary);
-      if (!m_outstream.is_open())
+#ifdef _MAC_
+      m_outstream.open(Utf8(m_outfile.c_str()), std::ios::out|std::ios::binary);
+#else
+			m_outstream.open(m_outfile.c_str(), std::ios::out|std::ios::binary);
+#endif
+			if (!m_outstream.is_open())
         return;
     }
     m_outstream.write((char*)data, size);

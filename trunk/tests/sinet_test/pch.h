@@ -17,4 +17,7 @@
 
 #endif // WIN32
 
+#ifdef _MAC_
+
+#endif
 #endif // PCH_H
