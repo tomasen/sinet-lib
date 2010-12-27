@@ -3,11 +3,11 @@
 #include "../../sinet/pool_impl.h"
 #include <time.h>
 #include <fstream>
-#include <Shlwapi.h>
 
 using namespace sinet;
 
 #if defined(_WINDOWS_)
+#include <Shlwapi.h>
 #define CLOCKS_PER_SECOND CLOCKS_PER_SEC
 #define _SLEEP(secs) ::Sleep(secs*1000);
 
@@ -66,7 +66,7 @@ using namespace sinet;
 
 #define TEST_RESULT(testcase, condition, variable) \
 { \
-  if (##condition)\
+  if (condition)\
   printf ("\ntest [%s] is [PASSED]\n", testcase);\
     else\
     printf ("\ntest [%s] [FAILED], condition requires (" #condition ") and its value is: %d\n", testcase, variable);\
