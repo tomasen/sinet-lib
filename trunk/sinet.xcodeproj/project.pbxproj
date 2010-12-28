@@ -34,6 +34,7 @@
 		9D16BA6F1240C697003DEFD1 /* task.h in Headers */ = {isa = PBXBuildFile; fileRef = 9D16BA561240C697003DEFD1 /* task.h */; };
 		9D47EC3512C9B8910082178A /* strings.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9D47EC3312C9B8910082178A /* strings.cc */; };
 		9D47EC3612C9B8910082178A /* strings.h in Headers */ = {isa = PBXBuildFile; fileRef = 9D47EC3412C9B8910082178A /* strings.h */; };
+		9D47EFF312C9EF2E0082178A /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D47EFF212C9EF2E0082178A /* CoreFoundation.framework */; };
 		9D9D81DC1241ECC8006D828A /* pch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D9D81DA1241ECC8006D828A /* pch.cpp */; };
 		9D9D81DD1241ECC8006D828A /* sinet_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D9D81DB1241ECC8006D828A /* sinet_test.cpp */; };
 		9D9D82121241F487006D828A /* libsinet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D16BA391240C64F003DEFD1 /* libsinet.a */; };
@@ -78,6 +79,7 @@
 		9D16BA561240C697003DEFD1 /* task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = task.h; path = sinet/task.h; sourceTree = "<group>"; };
 		9D47EC3312C9B8910082178A /* strings.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = strings.cc; path = sinet/strings.cc; sourceTree = "<group>"; };
 		9D47EC3412C9B8910082178A /* strings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = strings.h; path = sinet/strings.h; sourceTree = "<group>"; };
+		9D47EFF212C9EF2E0082178A /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		9D9D81D51241EC91006D828A /* sinet_test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sinet_test; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D9D81D91241ECC8006D828A /* pch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pch.h; path = tests/sinet_test/pch.h; sourceTree = "<group>"; };
 		9D9D81DA1241ECC8006D828A /* pch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pch.cpp; path = tests/sinet_test/pch.cpp; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D9D82121241F487006D828A /* libsinet.a in Frameworks */,
+				9D47EFF312C9EF2E0082178A /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +140,7 @@
 				9D16BA551240C697003DEFD1 /* task_observer.h */,
 				9D16BA561240C697003DEFD1 /* task.h */,
 				9D16BA3A1240C64F003DEFD1 /* Products */,
+				9D47EFF212C9EF2E0082178A /* CoreFoundation.framework */,
 			);
 			sourceTree = "<group>";
 		};

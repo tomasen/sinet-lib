@@ -35,12 +35,16 @@ using namespace sinet;
     \
 }
 
+#if defined(_WINDOWS_)
 #define SINET_APPPATH(apppath) \
   wchar_t tmppath[256];\
   GetModuleFileName(NULL, tmppath, 256);\
   PathRemoveFileSpecW(tmppath);\
   apppath = tmppath;
-
+#else
+#define SINET_APPPATH(apppath) \
+  apppath = L"/tmp/" ;
+#endif
 
   /* ################### test macros ################### */
 #define TEST_ENTER(testcase) \
@@ -75,6 +79,7 @@ using namespace sinet;
 
 std::wstring Utf8StringToWString(const std::string& s)
 {
+#ifdef WIN32  
   wchar_t* wch;
   UINT bytes = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, NULL, 0);
   wch  = new wchar_t[bytes];
@@ -83,6 +88,10 @@ std::wstring Utf8StringToWString(const std::string& s)
   std::wstring str = wch;
   delete[] wch;
   return str;
+#endif
+#ifdef _MAC_
+  return std::wstring((const wchar_t*)Utf8(s.c_str()));
+#endif
 }
 
 void testcase_poolcreation()
@@ -156,8 +165,8 @@ void testcase_canceldownload(refptr<pool> pool, refptr<task> task, refptr<reques
   Test HTTP GET method
 
   test case
-    1¡¢the request url use chinese with utf8
-    2¡¢response body
+    1Â°Â¢the request url use chinese with utf8
+    2Â°Â¢response body
 
   validate:
     client-side raw data compare response body
@@ -220,7 +229,7 @@ void testcase_httpget(refptr<pool> pool, refptr<task> task, refptr<request> req,
     4. above mentioned can mix
 
   validate:
-    client-side post form, the values:"\x4E2D\x6587\x5B57\x7B26"(ÖÐÎÄ×Ö·û),abcdef,123456, or two mix upload
+    client-side post form, the values:"\x4E2D\x6587\x5B57\x7B26"(Ã·â€“Å’Æ’â—ŠÃ·âˆ‘Ëš),abcdef,123456, or two mix upload
     server-side raw data compare post data and the file size
     returns PASSED on success, otherwise FAILED
  */
@@ -263,7 +272,11 @@ void testcase_httpform(refptr<pool> pool, refptr<task> task, refptr<request> req
   if (ft == form_buffer || ft == form_all)
   {
     std::ifstream fs;
+#ifdef _MAC_
+    fs.open(Utf8(filepath.c_str()), std::ios::binary|std::ios::in);
+#else
     fs.open(filepath.c_str(), std::ios::binary|std::ios::in);
+#endif
     if (!fs)
     {
       wprintf(L"dose not open file.(%s)\n", filepath.c_str());
@@ -367,37 +380,37 @@ int main(int argc, char* argv[])
 
   // test http get
   refptr<request> req1 = request::create_instance();
-  req1->set_request_url(L"http://webpj/test_sinet.php?act=get");
+  req1->set_request_url(L"http://webpj.com:8080/misc/test_sinet.php?act=get");
   testcase_httpget(pool, task, req1);
 
   // test http request url of chinese with utf8
   refptr<request> req2 = request::create_instance();
-  req2->set_request_url(L"http://webpj/test_sinet.php?act=str&p=ÖÐÎÄ");
+  req2->set_request_url(L"http://webpj.com:8080/misc/test_sinet.php?act=str&p=ä¸­æ–‡");
   testcase_httpget(pool, task, req2, hg_getch);
 
   // test http post
   refptr<request> req3 = request::create_instance();
-  req3->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  req3->set_request_url(L"http://webpj.com:8080/misc/test_sinet.php?act=form");
   testcase_httpform(pool, task, req3);
 
   // test http post + upload buffer
   refptr<request> req4 = request::create_instance();
-  req4->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  req4->set_request_url(L"http://webpj.com:8080/misc/test_sinet.php?act=form");
   testcase_httpform(pool, task, req4, form_buffer);
 
   // test http post + upload file
   refptr<request> req5 = request::create_instance();
-  req5->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  req5->set_request_url(L"http://webpj.com:8080/misc/test_sinet.php?act=form");
   testcase_httpform(pool, task, req5, form_file);
 
   // test http post + upload buffer + upload file
   refptr<request> req6 = request::create_instance();
-  req6->set_request_url(L"http://webpj/test_sinet.php?act=form");
+  req6->set_request_url(L"http://webpj.com:8080/misc/test_sinet.php?act=form");
   testcase_httpform(pool, task, req6, form_all);
 
   // test http header
   refptr<request> req7 = request::create_instance();
-  req7->set_request_url(L"http://webpj/test_sinet.php?act=header");
+  req7->set_request_url(L"http://webpj.com:8080/misc/test_sinet.php?act=header");
   
   si_stringmap header;
   header[L"Cookie"] = L"a1=1234567; a2=cookie; a3=%E8%BF%99%E6%98%AFcookie; a4=%E6%B5%8B%E8%AF%95%E6%B5%8B%E8%AF%95";
