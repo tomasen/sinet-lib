@@ -253,7 +253,7 @@ void pool_impl::_thread()
   while (pthread_cond_timedwait(&m_stop_event, &mut_wait, &timeout) == ETIMEDOUT)
 #endif
   {
-    //printf("thread fired %d\n", future_us/1000);
+    // printf("thread fired %d\n", (int)(future_us/1000));
     // thread loop procedure is as follows:
     // 1. iterate through |m_tasks_running| and try curl_multi_perform
     //    on all of them, if one's |ti.running_handles| equals 0, move
