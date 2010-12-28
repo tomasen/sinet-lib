@@ -343,7 +343,8 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
   // things below are bogus curl calls for testing workflow
   // _prepare_task should iterator through all requests in refptr<task>
   // and make corresponding curl calls
-
+  std::vector<int> reqids(0);
+  
   taskinfo_in_out.running_handle = 0;
 
   taskinfo_in_out.hmaster = ::curl_multi_init();
@@ -355,10 +356,10 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     cfg->get_strvar(CFG_STR_PROXY, proxyurl);
     cfg->get_strvar(CFG_STR_AGENT, useragent);
   }
-
-  std::vector<int> reqids;
+  
+ 
   task_in->get_request_ids(reqids);
-
+  
   for (std::vector<int>::iterator it = reqids.begin(); it != reqids.end(); it++)
   {
     refptr<request> req = task_in->get_request(*it);
