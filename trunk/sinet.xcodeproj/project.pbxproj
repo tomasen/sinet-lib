@@ -226,6 +226,7 @@
 			isa = PBXProject;
 			buildConfigurationList = 9D16BA291240C613003DEFD1 /* Build configuration list for PBXProject "sinet" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				English,
