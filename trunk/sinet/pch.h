@@ -17,14 +17,13 @@
 
 #endif // WIN32
 
+#define _min(x,y) x<y?x:y
+
 #ifdef _MAC_
 
 #include <pthread.h>
 #include <time.h>
 #include <errno.h>
-
-
-#define _min(x,y) x<y?x:y
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreFoundation/CFBundle.h>
