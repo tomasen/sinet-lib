@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "request_impl.h"
-
+#define _min(x,y) x<y?x:y
 using namespace sinet;
 
 refptr<request> request::create_instance()
@@ -132,8 +132,10 @@ void request_impl::set_outfile(const wchar_t *file)
   m_outfile = file;
 #ifdef WIN32
   _wremove(m_outfile.c_str());
-#else
+#elif defined(_MAC_)
 	unlink(Utf8(m_outfile.c_str()));
+#elif defined(__linux__)
+  unlink((wchar_utf8(m_outfile)).c_str());
 #endif
 }
 
@@ -169,8 +171,10 @@ void request_impl::set_appendbuffer(const void* data, size_t size)
   case REQ_OUTFILE:
     if (!m_outstream.is_open())
     {
-#ifdef _MAC_
+#ifdef _MAC_ 
       m_outstream.open(Utf8(m_outfile.c_str()), std::ios::out|std::ios::binary);
+#elif  defined(__linux__)
+      m_outstream.open((wchar_utf8(m_outfile)).c_str(), std::ios::out|std::ios::binary);
 #else
 			m_outstream.open(m_outfile.c_str(), std::ios::out|std::ios::binary);
 #endif

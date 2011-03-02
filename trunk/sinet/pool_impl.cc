@@ -6,7 +6,7 @@
 #include <process.h>
 #include <algorithm>
 #include <ctype.h>
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
 #include <pthread.h>
 #endif
 
@@ -76,7 +76,7 @@ pool_impl::pool_impl(void)
 {
 #if defined(_WINDOWS_)
   m_thread = (HANDLE)::_beginthread(_thread_dispatch, 0, (void*)this);
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
   pthread_cond_init(&m_stop_event, NULL);
   ::pthread_create(&m_thread, NULL, _thread_dispatch, this);
 #endif
@@ -88,7 +88,7 @@ pool_impl::~pool_impl(void)
   clear_all();
 #if defined(_WINDOWS_)
   ::CloseHandle(m_stop_event);
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
   pthread_cond_destroy(&m_stop_event);
 #endif
   // when a thread created by _beginthread is gracefully closed, it'll
@@ -212,7 +212,7 @@ void pool_impl::clear_all()
 
 #if defined(_WINDOWS_)
 void pool_impl::_thread_dispatch(void* param)
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
 void* pool_impl::_thread_dispatch(void* param)
 #endif
 {
@@ -234,7 +234,7 @@ void pool_impl::_thread()
   const size_t sleep_period_max = 500;
   int sleep_period = 5;
   
-#if defined(_MAC_)
+#if defined(_MAC_) || defined(__linux__)
   pthread_mutex_t mut_wait = PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_lock(&mut_wait);
   
@@ -249,7 +249,7 @@ void pool_impl::_thread()
 
 #if defined(_WINDOWS_)
   while (::WaitForSingleObject(m_stop_event, sleep_period) == WAIT_TIMEOUT)
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
   while (pthread_cond_timedwait(&m_stop_event, &mut_wait, &timeout) == ETIMEDOUT)
 #endif
   {
@@ -325,7 +325,7 @@ void pool_impl::_thread()
       m_cstasks_running.unlock();
     }
 
-#if defined(_MAC_)
+#if defined(_MAC_) || defined(__linux__)
     gettimeofday(&now, NULL);
     future_us = now.tv_usec + sleep_period * 1000;
     timeout.tv_nsec = (future_us % 1000000) * 1000;
@@ -333,7 +333,7 @@ void pool_impl::_thread()
 #endif
   }
   
-#if defined(_MAC_)
+#if defined(_MAC_) || defined(__linux__)
   pthread_mutex_unlock(&mut_wait);
 #endif
 }
@@ -379,7 +379,6 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     ::curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void *)req.get());
     ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_mem_callback);
     ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)req.get());
-    ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 
     ::curl_easy_setopt(curl, CURLOPT_URL, strings::wstring_utf8string(req->get_request_url()).c_str());
 
@@ -483,7 +482,7 @@ void pool_impl::_stop_thread()
   if (m_thread && m_thread != INVALID_HANDLE_VALUE)
     ::WaitForSingleObject(m_thread, INFINITE);
   m_thread = NULL;
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
   pthread_cond_signal(&m_stop_event);
   pthread_join(m_thread, NULL);
 #endif

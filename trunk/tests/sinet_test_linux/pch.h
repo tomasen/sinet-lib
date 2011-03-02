@@ -16,7 +16,6 @@
 #include <windows.h>
 
 #endif // WIN32
-
 #ifdef __linux__
 #include <pthread.h>
 #include <time.h>
@@ -29,7 +28,44 @@
 #include <algorithm>
 
 #define _min(x,y) x<y?x:y
-// the template can be found in PeerBlock (https://code.google.com/p/peerblock/)
+/*class Utf8
+{
+public:
+  Utf8(const wchar_t* wsz): m_utf8(NULL), m_wstring(NULL)
+  {
+     // Linux uses 32-bit wchar
+     const int bytes = wcslen(wsz) * sizeof(wchar_t);
+     m_wstring = new wchar_t[bytes+1];
+     wcsncpy(m_wstring, wsz, bytes+1); // linux uses wcsncpy instead of wcslcpy in MAC OS X
+     std::string str;
+     // Now we have to convert wsz to wstring 
+     str = wchar_utf8(m_wstring);
+     int length = str.length();
+     m_utf8 = new char[length];
+     strncpy(m_utf8, str.c_str(), length);
+     return m_utf8;
+  }
+  Utf8(const char* sz): m_utf8(NULL), m_wstring(NULL)
+  {
+     const int bytes = strlen(sz) * sizeof(char);
+     m_utf8 = new char[bytes];
+     strncpy(m_utf8, sz, bytes);
+     std::string utf = m_utf8;
+     // utf8 -> wstring
+     std::wstring str = utf8_wchar(utf);
+     wcsncpy(m_wstring, str.c_str(),str.length());
+  }
+  ~Utf8() 
+  { 
+    if( m_utf8 )
+    {
+      delete[] m_utf8;
+      delete[] m_wstring;
+    }
+  }
+  
+public:*/
+  // the template can be found in http://code.google.com/p/peerblock/
   template<typename InputIterator>
   static wchar_t decode_utf8(InputIterator &iter) 
   {
@@ -54,7 +90,6 @@
               ((wchar_t)((*iter++)&0x3F))
              );
     }
-    wprintf(L"%c\n", ret);
     return ret;
   }
 
@@ -142,16 +177,16 @@
       return ret;
   }
   
+  //operator const char*() const { return m_utf8; }
+  //operator const wchar_t*() const { return m_wstring; }
+  
+/*private:
+  char* m_utf8;
+  wchar_t* m_wstring;
+};*/
 #endif // linux (litte endian)
 
 #ifdef _MAC_
-
-#include <pthread.h>
-#include <time.h>
-#include <errno.h>
-
-
-#define _min(x,y) x<y?x:y
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreFoundation/CFBundle.h>
@@ -188,10 +223,10 @@ public:
     CFStringEncoding encoding = kCFStringEncodingUTF32LE;
     
     CFStringRef cfstring = CFStringCreateWithBytesNoCopy(NULL, 
-																												 (const UInt8*)sz, bytes, 
-																												 kCFStringEncodingUTF8, false, 
-																												 kCFAllocatorNull
-																												 );
+                                                         (const UInt8*)sz, bytes, 
+                                                         kCFStringEncodingUTF8, false, 
+                                                         kCFAllocatorNull
+                                                         );
     
     const int bytesUtf8 = CFStringGetMaximumSizeOfFileSystemRepresentation(cfstring);
     m_utf8 = new char[bytesUtf8];
@@ -234,25 +269,23 @@ public:
       return;
     
     m_wstring[elements - 1] = '\0';
-		
+    
   }   
   
   ~Utf8() 
   { 
-    if( m_utf8 )
-    {
+    if (m_utf8)
       delete[] m_utf8;
+    if (m_wstring)
       delete[] m_wstring;
-    }
   }
   
 public:
-  operator const char*() const { return m_utf8; }
-  operator const wchar_t*() const { return m_wstring; }
+  operator const char*() const { return m_utf8?m_utf8:"";}
+  operator const wchar_t*() const { return m_wstring?m_wstring:L""; }
 private:
   char* m_utf8;
   wchar_t* m_wstring;
 };
 #endif
-
 #endif // PCH_H

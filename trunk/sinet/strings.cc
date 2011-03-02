@@ -18,8 +18,11 @@ std::string strings::wstring_utf8string(const std::wstring& s)
   delete[] ch;
   return str;
 #endif
-#ifdef _MAC_
+#ifdef _MAC_ 
   return std::string((const char*)Utf8(s.c_str()));
+#endif
+#ifdef __linux__
+  return wchar_utf8(s);
 #endif
 }
 
@@ -38,5 +41,8 @@ std::wstring strings::utf8string_wstring(const std::string& s)
 #endif
 #ifdef _MAC_
   return std::wstring((const wchar_t*)Utf8(s.c_str()));
+#endif
+#ifdef __linux__
+  return utf8_wchar(s);
 #endif
 }
