@@ -44,7 +44,7 @@ public:
   // threading details for the pool
 #if defined(_WINDOWS_)
   static void _thread_dispatch(void* param);
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
   static void* _thread_dispatch(void* param);
 #endif
   void _thread();
@@ -64,7 +64,7 @@ private:
 #if defined(_WINDOWS_)
   HANDLE  m_thread;
   HANDLE  m_stop_event;
-#elif defined(_MAC_)
+#elif defined(_MAC_) || defined(__linux__)
   pthread_t       m_thread;
   pthread_cond_t  m_stop_event;
 #endif
