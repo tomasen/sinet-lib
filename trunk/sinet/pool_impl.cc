@@ -379,7 +379,7 @@ void pool_impl::_prepare_task(refptr<task> task_in, task_info& taskinfo_in_out)
     ::curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void *)req.get());
     ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_mem_callback);
     ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)req.get());
-
+    ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
     ::curl_easy_setopt(curl, CURLOPT_URL, strings::wstring_utf8string(req->get_request_url()).c_str());
 
     // set the proxy
